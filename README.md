@@ -5,11 +5,11 @@ Protótipo de jogo de dominó digital com ambientes personalizáveis e ambienta�
 
 ## Estrutura
 
-- `assets/`: Recursos brutos (imagens, sons)
 - `godot/dominozada/`: Código-fonte do projeto Godot
   - `scenes/`: Cenas do jogo
   - `scripts/`: Lógica em GDScript
-  - `textures/` e `sounds/`: Assets processados
+  - `assets/`: Recursos (imagens, sons)
+    - `textures/` e `sounds/`: Assets processados
 
 ## Como Rodar
 
