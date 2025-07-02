@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://cxhlssuuirg6e"]
+
+[ext_resource type="Texture2D" uid="uid://bg3i5uqeyed6y" path="res://assets/textures/domino_pixelart_asset_pack/up/Domino_Up_1.png" id="1_vi3qo"]
+[ext_resource type="Script" uid="uid://d3rjt1ji2mg1e" path="res://scripts/domino_piece.gd" id="2_vi3qo"]
+
+[node name="DominoPiece" type="TextureButton"]
+offset_right = 34.0
+offset_bottom = 50.0
+texture_normal = ExtResource("1_vi3qo")
+ignore_texture_size = true
+script = ExtResource("2_vi3qo")
