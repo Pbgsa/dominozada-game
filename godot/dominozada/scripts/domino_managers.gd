@@ -12,19 +12,24 @@ func _ready():
 	available_pieces = range(total_pieces)
 	available_pieces.shuffle()
 
-	spawn_player_pieces("down", 6)
-	spawn_player_pieces("up", 6)
-	spawn_player_pieces("left", 6)
-	spawn_player_pieces("right", 6)
+	spawn_player_pieces("down",1, 6)
+	spawn_player_pieces("up",3, 6)
+	spawn_player_pieces("left",4, 6)
+	spawn_player_pieces("right",2, 6)
 
-func spawn_player_pieces(direction: String, amount: int):
+func spawn_player_pieces(direction: String, player: int, amount: int):
 	for i in range(amount):
 		if available_pieces.is_empty():
 			break
 		var index = available_pieces.pop_front()
+		var code = index_to_code(index)
+		 
 		var piece = piece_scene.instantiate()
 		
+		piece.belongsTo = player
 		piece.piece_index = index  # De 0 a 27
+		piece.code = code
+		
 		piece.current_direction_index = piece.directions.find(direction)
 
 		var texture_path = "res://assets/textures/domino_pixelart_asset_pack/%s/Domino_%s_%d.png" % [
@@ -51,3 +56,14 @@ func spawn_player_pieces(direction: String, amount: int):
 		piece.rotate_colision_area(direction)
 		piece.position = pos
 		add_child(piece)
+
+func index_to_code(index: int) -> Vector2i:
+	var count = 0
+	var code = Vector2i(-1, -1)
+	for i in range(7):  # 0 a 6
+		for j in range(i, 7):
+			if count == index:
+				code =  Vector2i(i, j)
+		 
+			count += 1
+	return code  # erro se índice inválido
