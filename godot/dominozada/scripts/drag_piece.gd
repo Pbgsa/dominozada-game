@@ -10,6 +10,7 @@ var offset := Vector2.ZERO
 var directions := ["up", "right", "down", "left"]
 var current_direction_index := 0
 var piece_index := 0
+var value = [0, 0]
 
 func _ready():
 	area.input_event.connect(_on_input_event)
@@ -25,6 +26,26 @@ func _on_input_event(viewport, event, shape_idx):
 			
 		elif event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 			rotate_piece()
+
+func set_values(index: int):
+	var count = 0
+	for i in range(7):
+		for j in range(i, 7):
+			if count == index:
+				piece_index = i
+				value = [i, j]
+				break
+			count += 1
+	if count <= index:
+		print("Index out of range for domino pieces.")
+		return
+
+	var dir = directions[current_direction_index]
+	var path = "res://assets/textures/domino_pixelart_asset_pack/%s/Domino_%s_%d.png" % [
+		dir, dir.capitalize(), piece_index + 1
+	]
+	sprite.texture = load(path)
+	rotate_colision_area(dir)
 
 func _process(_delta):
 	if dragging:
