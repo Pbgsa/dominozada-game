@@ -1,20 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://bwui6cfgnq0pi"]
+[gd_scene load_steps=5 format=3 uid="uid://bwui6cfgnq0pi"]
 
 [ext_resource type="Texture2D" uid="uid://ds6o58ufyhugp" path="res://assets/textures/vecteezy_empty-billiard-table-3d-render_7470537.jpg" id="1_bw3vb"]
 [ext_resource type="Script" uid="uid://dtebb1dp2mdhr" path="res://scripts/board.gd" id="1_tx6nw"]
+[ext_resource type="PackedScene" uid="uid://bmhq16csacx2" path="res://scenes/player_hand.tscn" id="3_nglv8"]
+[ext_resource type="PackedScene" uid="uid://dp60ecnv41070" path="res://scenes/opponent_hands.tscn" id="4_fv4ni"]
 
 [node name="Board" type="Node2D"]
 script = ExtResource("1_tx6nw")
 
 [node name="TableBackground" type="Sprite2D" parent="."]
-position = Vector2(598, 301)
+position = Vector2(564, 319)
 texture = ExtResource("1_bw3vb")
 
 [node name="PieceSpawner" type="Node2D" parent="."]
-position = Vector2(595, 311)
+position = Vector2(564, 319)
 
 [node name="Heads" type="Node2D" parent="."]
-position = Vector2(600, 300)
+position = Vector2(564, 319)
 
 [node name="LeftHead" type="Marker2D" parent="Heads"]
 position = Vector2(100, 0)
@@ -22,3 +24,10 @@ gizmo_extents = 1.0
 
 [node name="RightHead" type="Marker2D" parent="Heads"]
 position = Vector2(-100, 0)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="OpponentHands" parent="CanvasLayer" instance=ExtResource("4_fv4ni")]
+offset_right = 3.0
+
+[node name="PlayerHand" parent="CanvasLayer" instance=ExtResource("3_nglv8")]
