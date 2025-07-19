@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://dqx662xxathl4"]
+[gd_scene load_steps=2 format=3 uid="uid://ukk8wklb6w30"]
 
-[ext_resource type="Script" uid="uid://dvq0bkyy1o78h" path="res://scripts/opponent.gd" id="1_a6re5"]
+[ext_resource type="Script" path="res://scripts/h_opponent.gd" id="1_412d8"]
 
 [node name="HOpponentHand" type="HBoxContainer"]
 anchors_preset = 15
