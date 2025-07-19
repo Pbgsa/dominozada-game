@@ -1,0 +1,35 @@
+name: Feature Request
+description: Use this template to suggest a feature or task
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: input
+    id: description
+    attributes:
+      label: Description
+      description: What is this feature or task about?
+      placeholder: Write a concise description...
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: Task type
+      options:
+        - Game logic
+        - Multiplayer logic
+        - UI/UX
+        - Asset
+        - Documentation
+        - Bugfix
+        - Other
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps or expected flow
+      description: What steps or logic should be implemented?
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+      description: Include mockups, references, or any context.
