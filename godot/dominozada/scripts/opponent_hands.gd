@@ -12,8 +12,8 @@ func _ready():
 func update_hands(pieces_by_player: Dictionary):
 	# Correct orientations for each position
 	if top_hand:
-		top_hand.set_piece_count(pieces_by_player.get("top", 0), "up")  # Top uses "up" orientation
+		top_hand.set_piece_count(pieces_by_player.get("top", 0), "up", false)  # Top uses "up" orientation
 	if left_hand:
-		left_hand.set_piece_count(pieces_by_player.get("left", 0), "left")  # Left uses "left" orientation
+		left_hand.set_piece_count(pieces_by_player.get("left", 0), "left", true)  # Left uses "left" orientation
 	if right_hand:
-		right_hand.set_piece_count(pieces_by_player.get("right", 0), "right")  # Right uses "right" orientation
+		right_hand.set_piece_count(pieces_by_player.get("right", 0), "right", true)  # Right uses "right" orientation
