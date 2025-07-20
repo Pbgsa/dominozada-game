@@ -1,35 +1,3 @@
-[gd_scene load_steps=5 format=3 uid="uid://43dgtnbhxf65"]
-
-[ext_resource type="Script" uid="uid://cw3akt6ja6lu4" path="res://scripts/main.gd" id="1_0wfyh"]
-[ext_resource type="Texture2D" uid="uid://ds6o58ufyhugp" path="res://assets/textures/vecteezy_empty-billiard-table-3d-render_7470537.jpg" id="2_0wfyh"]
-[ext_resource type="Script" uid="uid://gx16uunhjnae" path="res://scripts/domino_managers.gd" id="4_jyhfs"]
-[ext_resource type="PackedScene" uid="uid://ciar5fmn8bvs5" path="res://scenes/domino_piece_2d.tscn" id="4_tbgi4"]
+[gd_scene format=3 uid="uid://43dgtnbhxf65"]
 
 [node name="Main" type="Node2D"]
-script = ExtResource("1_0wfyh")
-
-[node name="Background" type="Sprite2D" parent="."]
-position = Vector2(-244, -184)
-scale = Vector2(0.4, 0.4)
-texture = ExtResource("2_0wfyh")
-centered = false
-
-[node name="UI" type="CanvasLayer" parent="."]
-
-[node name="Label" type="Label" parent="UI"]
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 60.0
-offset_bottom = 43.0
-text = "Prototype"
-
-[node name="Button" type="Button" parent="UI"]
-offset_left = 900.0
-offset_top = 600.0
-offset_right = 1123.0
-offset_bottom = 631.0
-text = "Change Sound Environment"
-
-[node name="DominoManagers" type="Node" parent="."]
-script = ExtResource("4_jyhfs")
-piece_scene = ExtResource("4_tbgi4")

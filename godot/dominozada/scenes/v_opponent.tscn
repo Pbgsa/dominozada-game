@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbxuuxh68yuoo"]
+
+[ext_resource type="Script" uid="uid://dvq0bkyy1o78h" path="res://scripts/opponent.gd" id="1_m8350"]
+
+[node name="VOpponentHand" type="VBoxContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_m8350")

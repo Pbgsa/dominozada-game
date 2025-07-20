@@ -1,0 +1,30 @@
+[gd_scene load_steps=4 format=3 uid="uid://d4hpxm1x8x7yf"]
+
+[ext_resource type="Script" uid="uid://b0yg26t83prmc" path="res://scripts/domino_piece_button.gd" id="1_q6goc"]
+[ext_resource type="PackedScene" uid="uid://ctoqeabxppbnu" path="res://scenes/domino_piece.tscn" id="2_n1pvm"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
+bg_color = Color(0.3, 0.3, 0.3, 0.5)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6, 0.6, 0.6, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="DominoPieceButton" type="Button"]
+custom_minimum_size = Vector2(40, 60)
+offset_left = -20.0
+offset_top = -30.0
+offset_right = 20.0
+offset_bottom = 30.0
+mouse_default_cursor_shape = 2
+theme_override_styles/hover = SubResource("StyleBoxFlat_1")
+flat = true
+script = ExtResource("1_q6goc")
+
+[node name="DominoPiece" parent="." instance=ExtResource("2_n1pvm")]
+position = Vector2(20, 30)
