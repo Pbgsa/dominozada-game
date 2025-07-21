@@ -32,10 +32,6 @@ func _on_input_event(viewport, event, shape_idx):
 		elif event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 			rotate_piece()
 			
-	elif event is InputEventKey:
-		if event.pressed and event.keycode == KEY_T:
-			print("Tecla T pressionada!")
-			# Aqui você pode executar a ação desejada ao pressionar T
 
 func _unhandled_input(event):
 	if event is InputEventKey:

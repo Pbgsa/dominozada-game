@@ -4,9 +4,11 @@ extends Node
 @export var screen_size := Vector2(1152, 648)
 @export var spacing := 90
 @export var vertical_spacing := 50
+@export var player_scene: PackedScene
 
 var available_pieces := []
 var total_pieces := 28
+var players = []
 
 func _ready():
 	available_pieces = range(total_pieces)
@@ -16,6 +18,18 @@ func _ready():
 	spawn_player_pieces("up",3, 6)
 	spawn_player_pieces("left",4, 6)
 	spawn_player_pieces("right",2, 6)
+
+func spawn_players():
+	var directions = ["down", "up", "left", "right"]
+	for dir in directions:
+		var player = player_scene.instantiate()
+		player.name = dir
+		player.is_bot = (dir != "down")  # exemplo: somente 'down' é humano
+		add_child(player)
+		players.append(player)
+
+	print("Jogadores inicializados: ", players)
+
 
 func spawn_player_pieces(direction: String, player: int, amount: int):
 	for i in range(amount):
