@@ -1,3 +1,13 @@
-[gd_scene format=3 uid="uid://43dgtnbhxf65"]
+[gd_scene load_steps=3 format=3 uid="uid://43dgtnbhxf65"]
+
+[ext_resource type="PackedScene" path="res://scenes/board.tscn" id="1_o5qli"]
+[ext_resource type="Script" uid="uid://c0ilo4bqi0ii0" path="res://scripts/logic.gd" id="2_0wfyh"]
 
 [node name="Main" type="Node2D"]
+
+[node name="Board" parent="." instance=ExtResource("1_o5qli")]
+
+[node name="Logic" type="Node" parent="."]
+script = ExtResource("2_0wfyh")
+
+[node name="Standard" type="Node" parent="Logic"]
