@@ -4,9 +4,9 @@ extends Container  # Pode ser VBoxContainer ou HBoxContainer
 
 @onready var piece_button_scene: PackedScene = preload("res://scenes/domino_piece_button.tscn")
 
-func set_piece_count(count: int, direction: String, is_vertical: bool):
+func set_piece_count(count: int, direction: String, orientation: bool):
 	clear_hand()
-	is_vertical = is_vertical
+	is_vertical = orientation
 	for i in range(count):
 		var button = piece_button_scene.instantiate()
 		
