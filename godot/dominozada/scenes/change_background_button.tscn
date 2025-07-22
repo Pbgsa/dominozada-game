@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bp3vhadl5ywo1"]
 
-[ext_resource type="Script" uid="uid://b45185invotly" path="res://scenes/change_background_button.gd" id="1_otmxc"]
+[ext_resource type="Script" uid="uid://b45185invotly" path="res://scripts/change_background_button.gd" id="1_otmxc"]
 
 [node name="ChangeBackgroundButton" type="Button"]
 offset_right = 8.0
