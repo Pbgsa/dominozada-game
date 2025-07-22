@@ -9,14 +9,16 @@ var players := []
 @export var player_hand : PackedScene = preload("res://scenes/player_hand.tscn")
 
 func on_piece_played(piece_data: Dictionary):
-	print("piece_dat")
+
 	var piece = {
 		"code": Vector2i(piece_data.a, piece_data.b),
 	}
 	if check_validity(piece):
 		update_heads(piece)
+		game.append(piece)
 		# Adicione lógica para atualizar o tabuleiro, pontuação, etc.
 		print("Jogada válida: ", piece_data)
+		print(game)
 	else:
 		print("Jogada inválida: ", piece_data)
 
