@@ -22,16 +22,20 @@ func _ready():
 	# Set board center based on table background position
 	board_center = table_background.position
 
-func _on_piece_played(piece_data: Dictionary):
-	# Validate if the move is possible
-	if not is_valid_move(piece_data.a, piece_data.b):
-		if not pieces_sequence.is_empty():
-			print("Available ends: left=%d, right=%d" % [left_value, right_value])
+func _on_piece_played(piece_data: Dictionary, placement_side: String):
+	# For first piece, ignore placement_side
+	if pieces_sequence.is_empty():
+		add_piece_to_board_on_side(piece_data, "first")
+		player_hand.remove_piece_from_hand(piece_data)
+		return
+	
+	# Validate if the move is possible on the specified side
+	if not is_valid_move_on_side(piece_data.a, piece_data.b, placement_side):
 		player_hand.show_invalid_move_message(piece_data)
 		return
 	
 	# Valid move - process it
-	add_piece_to_board(piece_data)
+	add_piece_to_board_on_side(piece_data, placement_side)
 	player_hand.remove_piece_from_hand(piece_data)
 
 func _on_passed_turn():
@@ -312,6 +316,60 @@ func is_valid_move(piece_a: int, piece_b: int) -> bool:
 	# Check if piece can connect to any end
 	return (piece_a == left_value or piece_b == left_value or 
 			piece_a == right_value or piece_b == right_value)
+
+func is_valid_move_on_side(piece_a: int, piece_b: int, placement_side: String) -> bool:
+	"""Checks if a move is valid on a specific side"""
+	if pieces_sequence.is_empty():
+		return true  # First piece is always valid
+	
+	match placement_side:
+		"left":
+			return piece_a == left_value or piece_b == left_value
+		"right":
+			return piece_a == right_value or piece_b == right_value
+		_:
+			return false
+
+func add_piece_to_board_on_side(data: Dictionary, placement_side: String):
+	"""Add piece to board on specified side"""
+	var piece_a = data.a
+	var piece_b = data.b
+	
+	# Check if it's the first piece
+	if pieces_sequence.is_empty() or placement_side == "first":
+		# First piece - set initial ends and place at center
+		pieces_sequence.append({"a": piece_a, "b": piece_b})
+		left_value = piece_a
+		right_value = piece_b
+		
+		# Reset head positions to center
+		left_head.position = Vector2.ZERO
+		right_head.position = Vector2.ZERO
+		
+		create_visual_piece_at_center()
+		return
+	
+	# Place piece on specified side
+	match placement_side:
+		"left":
+			if piece_a == left_value:
+				pieces_sequence.push_front({"a": piece_b, "b": piece_a})
+				left_value = piece_b
+			elif piece_b == left_value:
+				pieces_sequence.push_front({"a": piece_a, "b": piece_b})
+				left_value = piece_a
+			create_visual_piece_at_side("left")
+			
+		"right":
+			if piece_a == right_value:
+				pieces_sequence.append({"a": piece_a, "b": piece_b})
+				right_value = piece_b
+			elif piece_b == right_value:
+				pieces_sequence.append({"a": piece_b, "b": piece_a})
+				right_value = piece_a
+			create_visual_piece_at_side("right")
+	
+	update_head_positions()
 
 func get_connection_info(piece_a: int, piece_b: int) -> Dictionary:
 	"""Returns information about where the piece can be connected"""

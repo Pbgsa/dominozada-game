@@ -1,0 +1,68 @@
+[gd_scene load_steps=2 format=3 uid="uid://bj8xvn1ksm5yd"]
+
+[ext_resource type="Script" uid="uid://b7mdm1hw7hpu" path="res://scripts/placement_options.gd" id="1_0qj4v"]
+
+[node name="PlacementOptions" type="CanvasLayer"]
+script = ExtResource("1_0qj4v")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="OptionsContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -60.0
+offset_right = 100.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="Control/OptionsContainer"]
+layout_mode = 2
+text = "Onde colocar a peça?"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Control/OptionsContainer"]
+layout_mode = 2
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="Control/OptionsContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="LeftButton" type="Button" parent="Control/OptionsContainer/ButtonsContainer"]
+layout_mode = 2
+text = "Lado Esquerdo"
+
+[node name="RightButton" type="Button" parent="Control/OptionsContainer/ButtonsContainer"]
+layout_mode = 2
+text = "Lado Direito"
+
+[node name="HSeparator2" type="HSeparator" parent="Control/OptionsContainer"]
+layout_mode = 2
+
+[node name="CancelButton" type="Button" parent="Control/OptionsContainer"]
+layout_mode = 2
+text = "Cancelar"
+
+[connection signal="pressed" from="Control/OptionsContainer/ButtonsContainer/LeftButton" to="." method="_on_left_button_pressed"]
+[connection signal="pressed" from="Control/OptionsContainer/ButtonsContainer/RightButton" to="." method="_on_right_button_pressed"]
+[connection signal="pressed" from="Control/OptionsContainer/CancelButton" to="." method="_on_cancel_button_pressed"]

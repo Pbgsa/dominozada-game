@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvhgx0qsw8tjy"]
+
+[ext_resource type="Script" uid="uid://c3bp0ws72mh7f" path="res://scripts/invalid_move_message.gd" id="1_7vj8d"]
+
+[node name="InvalidMoveMessage" type="CanvasLayer"]
+script = ExtResource("1_7vj8d")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -296.0
+offset_right = 349.0
+offset_bottom = -79.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="Control/CenterContainer"]
+modulate = Color(1, 0.5, 0.5, 0.9)
+layout_mode = 2
+
+[node name="MessageLabel" type="Label" parent="Control/CenterContainer/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -117.0
+offset_top = -52.0
+offset_right = 125.0
+offset_bottom = 52.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "INVALID MOVE!"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
