@@ -15,12 +15,17 @@ var visual_pieces: Array[Node2D] = []  # Corresponding visual pieces
 var piece_spacing := Vector2(30, 0)  # Base spacing for fallback
 var board_center := Vector2.ZERO
 
+var game_manager: Node  # Referência ao gerenciador do jogo
+
 func _ready():
 	player_hand.piece_played.connect(_on_piece_played)
 	player_hand.passed_turn.connect(_on_passed_turn)
 	
 	# Set board center based on table background position
 	board_center = table_background.position
+	
+	# Conectar com o GameManager se existir
+	game_manager = get_node("/root/GameManager") if has_node("/root/GameManager") else null
 
 func _on_piece_played(piece_data: Dictionary, placement_side: String):
 	# For first piece, ignore placement_side
@@ -265,49 +270,6 @@ func get_board_piece_count() -> int:
 	"""Returns the number of pieces on the board"""
 	return pieces_sequence.size()
 
-# func debug_print_positions():
-# 	"""Debug function to print pieces_sequence"""
-# 	print("=== pieces_sequence ===")
-# 	print(pieces_sequence)
-# 	print("left_head: %d, right_head: %d" % [left_value, right_value])
-	
-# 	# Mostrar posições dos marcadores
-# 	print("=== posições dos marcadores ===")
-# 	print("left_head position: %s" % left_head.position)
-# 	print("right_head position: %s" % right_head.position)
-	
-# 	# Mostrar orientações das peças
-# 	print("=== orientações das peças ===")
-# 	for i in range(pieces_sequence.size()):
-# 		var piece = pieces_sequence[i]
-# 		var piece_a = piece.a
-# 		var piece_b = piece.b
-# 		var orientation = ""
-		
-# 		if piece_a > piece_b:
-# 			orientation = "left"
-# 		elif piece_b > piece_a:
-# 			orientation = "right"
-# 		else:
-# 			orientation = "up"
-		
-# 		print("Peça %d: [%d,%d] -> %s" % [i + 1, piece_a, piece_b, orientation])
-	
-# 	# Mostrar posições das peças visuais
-# 	print("=== posições das peças visuais ===")
-# 	for i in range(visual_pieces.size()):
-# 		var piece_node = visual_pieces[i]
-# 		if piece_node and is_instance_valid(piece_node):
-# 			print("Peça visual %d: position %s" % [i + 1, piece_node.position])
-	
-# 	# Mostrar cálculos de espaçamento
-# 	print("=== cálculos de espaçamento ===")
-# 	for i in range(pieces_sequence.size()):
-# 		var piece = pieces_sequence[i]
-# 		var orientation = get_piece_orientation(piece.a, piece.b)
-# 		var width = get_piece_width(orientation)
-# 		print("Peça %d: orientação=%s, largura=%d" % [i + 1, orientation, width])
-
 func is_valid_move(piece_a: int, piece_b: int) -> bool:
 	"""Checks if a move is valid"""
 	if pieces_sequence.is_empty():
@@ -405,3 +367,35 @@ func get_connection_info(piece_a: int, piece_b: int) -> Dictionary:
 		return info
 	
 	return info
+
+func can_place_piece(piece: Dictionary, side: String) -> bool:
+	"""Verifica se uma peça pode ser colocada em um lado específico"""
+	if pieces_sequence.is_empty():
+		return true  # Primeira peça sempre pode
+	
+	match side:
+		"left":
+			return piece.a == left_value or piece.b == left_value
+		"right":
+			return piece.a == right_value or piece.b == right_value
+		_:
+			return false
+
+func place_piece(piece: Dictionary, side: String):
+	"""Coloca uma peça no tabuleiro (usado pelo GameManager)"""
+	if pieces_sequence.is_empty():
+		add_piece_to_board_on_side(piece, "first")
+	else:
+		add_piece_to_board_on_side(piece, side)
+
+func get_left_value() -> int:
+	"""Retorna o valor da extremidade esquerda"""
+	return left_value
+
+func get_right_value() -> int:
+	"""Retorna o valor da extremidade direita"""
+	return right_value
+
+func is_empty() -> bool:
+	"""Verifica se o tabuleiro está vazio"""
+	return pieces_sequence.is_empty()
