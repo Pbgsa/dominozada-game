@@ -145,7 +145,7 @@ func remove_piece_from_hand(piece_data: Dictionary):
 
 func show_invalid_move_message(piece_data: Dictionary):
 	"""Shows message when a move is invalid"""
-	var message = "❌ INVALID MOVE: Piece [%d,%d] cannot be placed on the board!" % [piece_data.a, piece_data.b]
+	var message = "❌ JOGADA INVALIDA: Peça [%d,%d] não pode ser colocada no tabuleiro!" % [piece_data.a, piece_data.b]
 	print(message)
 	
 	# Show visual notification
