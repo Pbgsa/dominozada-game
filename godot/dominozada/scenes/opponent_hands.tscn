@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://dp60ecnv41070"]
 
 [ext_resource type="Script" uid="uid://buoi8dwhuhvh7" path="res://scripts/opponent_hands.gd" id="1_t6khb"]
-[ext_resource type="PackedScene" uid="uid://dqx662xxathl4" path="res://scenes/h_opponent.tscn" id="2_mwnbu"]
+[ext_resource type="PackedScene" uid="uid://ukk8wklb6w30" path="res://scenes/h_opponent.tscn" id="2_mwnbu"]
 [ext_resource type="PackedScene" uid="uid://cbxuuxh68yuoo" path="res://scenes/v_opponent.tscn" id="3_mwnbu"]
 
 [node name="OpponentHands" type="Control"]

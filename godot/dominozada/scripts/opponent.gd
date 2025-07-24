@@ -1,16 +1,14 @@
 extends Container  # Pode ser VBoxContainer ou HBoxContainer
 
-@export var is_vertical: bool = true
-
 @onready var piece_button_scene: PackedScene = preload("res://scenes/domino_piece_button.tscn")
 
-func set_piece_count(count: int, direction: String, is_vertical: bool):
+func set_piece_count(count: int, direction: String):
 	clear_hand()
-	is_vertical = is_vertical
+
 	for i in range(count):
 		var button = piece_button_scene.instantiate()
-		
-		if is_vertical:
+
+		if direction == "up" or direction == "down":
 			button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		else:
 			button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
