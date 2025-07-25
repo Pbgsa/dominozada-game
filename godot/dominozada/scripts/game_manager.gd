@@ -14,6 +14,8 @@ signal game_over(winner_id: int, reason: String)
 signal piece_distributed
 signal player_passed(player_id: int)
 signal piece_played(player_id: int, piece: Dictionary)
+signal player_hand_changed(player_id: int, new_count: int)
+signal bot_action_message(message: String)
 
 enum GameState {
 	MENU,
@@ -114,6 +116,9 @@ func distribute_pieces():
 				player.add_piece_to_hand(piece)
 	
 	piece_distributed.emit()
+	
+	# Atualizar contadores de peças na UI
+	call_deferred("update_all_hand_counts")
 
 func find_first_player() -> int:
 	"""Encontra o jogador com a peça dupla mais alta (não usado atualmente)"""
@@ -154,6 +159,9 @@ func play_piece(player_id: int, piece: Dictionary, side: String) -> bool:
 		# Emitir sinal de peça jogada
 		piece_played.emit(player_id, piece)
 		
+		# Emitir sinal de mudança na mão do jogador
+		player_hand_changed.emit(player_id, player.get_hand_count())
+		
 		# Verificar vitória
 		if player.get_hand_count() == 0:
 			end_game(player_id, GameOverReason.EMPTY_HAND)
@@ -193,12 +201,26 @@ func next_turn():
 
 func execute_bot_turn():
 	"""Executa o turno do bot"""
-	var bot = players[current_player]  # Bot player
+	var bot = players[current_player]
+	
+	# Adicionar delay para tornar o jogo mais natural
+	await get_tree().create_timer(2).timeout
+	bot_action_message.emit("%s está pensando..." % bot.player_name)
+	
+	# Verificar se o jogo ainda está ativo após o delay
+	if current_state != GameState.PLAYING:
+		return
+	
 	var move = bot.decide_move(board)
 	
 	if move.has("piece") and move.has("side"):
+		await get_tree().create_timer(2).timeout
+		var side_text = "esquerda" if move.side == "left" else "direita"
+		bot_action_message.emit("%s jogou na %s" % [bot.player_name, side_text])
 		play_piece(current_player, move.piece, move.side)
 	else:
+		await get_tree().create_timer(2).timeout
+		bot_action_message.emit("%s passou a vez" % bot.player_name)
 		pass_turn(current_player)
 
 func end_game(winner_id: int, reason: GameOverReason):
@@ -240,3 +262,8 @@ func get_current_player() -> RefCounted:
 func is_human_turn() -> bool:
 	"""Verifica se é o turno do jogador humano"""
 	return current_player == 0
+
+func update_all_hand_counts():
+	"""Emite sinais de atualização para todas as mãos dos jogadores"""
+	for i in range(players.size()):
+		player_hand_changed.emit(i, players[i].get_hand_count())

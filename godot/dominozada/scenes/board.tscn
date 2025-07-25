@@ -39,10 +39,10 @@ offset_bottom = 3.0
 [node name="PlayerHand" parent="CanvasLayer" instance=ExtResource("3_nglv8")]
 
 [node name="ChangeBackgroundButton" parent="CanvasLayer" node_paths=PackedStringArray("table_sprite") instance=ExtResource("5_dxjtj")]
-offset_left = 962.0
-offset_top = 584.0
-offset_right = 1125.0
-offset_bottom = 622.0
+offset_left = 970.0
+offset_top = 9.0
+offset_right = 1133.0
+offset_bottom = 47.0
 text = "Change background"
 table_sprite = NodePath("../../TableBackground")
 

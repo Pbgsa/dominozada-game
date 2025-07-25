@@ -19,6 +19,7 @@ func _ready():
 		game_manager.game_over.connect(_on_game_over)
 		game_manager.game_started.connect(_on_game_started)
 		game_manager.player_passed.connect(_on_player_passed)
+		game_manager.bot_action_message.connect(_on_bot_action_message)
 	
 	# Conectar botões
 	pass_button.pressed.connect(_on_pass_button_pressed)
@@ -63,7 +64,10 @@ func _on_game_started():
 func _on_player_passed(player_id: int):
 	"""Jogador passou a vez"""
 	var player = game_manager.players[player_id]
-	show_pass_message(player.player_name + " passou a vez!")
+	if player_id == 0:  # Jogador humano
+		show_temporary_message("Você passou a vez")
+	else:  # Bot (mas isso será tratado pelo bot_action_message)
+		pass  # Mensagem será exibida via bot_action_message
 
 func _on_pass_button_pressed():
 	"""Jogador humano passa a vez"""
@@ -110,3 +114,36 @@ func update_ui_state():
 func show_pass_message(message: String):
 	"""Mostra mensagem temporária quando alguém passa"""
 	print(message)  # Por enquanto só print, pode implementar UI visual depois
+
+func _on_bot_action_message(message: String):
+	"""Mostra mensagem temporária das ações dos bots"""
+	show_temporary_message(message)
+
+func show_temporary_message(message: String):
+	"""Mostra uma mensagem temporária no canto superior esquerdo"""
+	# Criar label temporário se não existir
+	var temp_label = get_node_or_null("Control/TempMessage")
+	if not temp_label:
+		temp_label = Label.new()
+		temp_label.name = "TempMessage"
+		temp_label.position = Vector2(20, 20)
+		temp_label.add_theme_font_size_override("font_size", 16)
+		temp_label.add_theme_color_override("font_color", Color.WHITE)
+		temp_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+		temp_label.add_theme_constant_override("shadow_offset_x", 2)
+		temp_label.add_theme_constant_override("shadow_offset_y", 2)
+		$Control.add_child(temp_label)
+	
+	# Configurar mensagem
+	temp_label.text = message
+	temp_label.visible = true
+	
+	# Animar fade in
+	temp_label.modulate.a = 0.0
+	var tween = create_tween()
+	tween.tween_property(temp_label, "modulate:a", 1.0, 0.2)
+	
+	# Aguardar e fade out
+	tween.tween_interval(1.0)  # Mensagem visível por 1 segundo
+	tween.tween_property(temp_label, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(func(): temp_label.visible = false)
