@@ -5,7 +5,7 @@
 [node name="GameUI" type="CanvasLayer"]
 script = ExtResource("1_x8k2d")
 
-[node name="Control" type="Control" parent="."]
+[node name="MainContainer" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -14,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TurnInfo" type="VBoxContainer" parent="Control"]
+[node name="TurnInfo" type="VBoxContainer" parent="MainContainer"]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -25,12 +25,12 @@ offset_right = 200.0
 offset_bottom = -20.0
 grow_vertical = 0
 
-[node name="TurnLabel" type="Label" parent="Control/TurnInfo"]
+[node name="TurnLabel" type="Label" parent="MainContainer/TurnInfo"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Turno: Jogador"
 
-[node name="ActionButtons" type="HBoxContainer" parent="Control"]
+[node name="ActionButtons" type="HBoxContainer" parent="MainContainer"]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -44,15 +44,15 @@ offset_bottom = -20.0
 grow_horizontal = 0
 grow_vertical = 0
 
-[node name="PassButton" type="Button" parent="Control/ActionButtons"]
+[node name="PassButton" type="Button" parent="MainContainer/ActionButtons"]
 layout_mode = 2
 text = "Passar Vez"
 
-[node name="StartButton" type="Button" parent="Control/ActionButtons"]
+[node name="StartButton" type="Button" parent="MainContainer/ActionButtons"]
 layout_mode = 2
 text = "Iniciar Jogo"
 
-[node name="GameOverPanel" type="Panel" parent="Control"]
+[node name="GameOverPanel" type="Panel" parent="MainContainer"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -67,7 +67,7 @@ offset_bottom = 100.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="Control/GameOverPanel"]
+[node name="GameOverContent" type="VBoxContainer" parent="MainContainer/GameOverPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -79,20 +79,20 @@ offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="WinnerLabel" type="Label" parent="Control/GameOverPanel/VBox"]
+[node name="WinnerLabel" type="Label" parent="MainContainer/GameOverPanel/GameOverContent"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Jogador Venceu!"
 horizontal_alignment = 1
 
-[node name="ReasonLabel" type="Label" parent="Control/GameOverPanel/VBox"]
+[node name="ReasonLabel" type="Label" parent="MainContainer/GameOverPanel/GameOverContent"]
 layout_mode = 2
 text = "Mão vazia!"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="Control/GameOverPanel/VBox"]
+[node name="HSeparator" type="HSeparator" parent="MainContainer/GameOverPanel/GameOverContent"]
 layout_mode = 2
 
-[node name="NewGameButton" type="Button" parent="Control/GameOverPanel/VBox"]
+[node name="NewGameButton" type="Button" parent="MainContainer/GameOverPanel/GameOverContent"]
 layout_mode = 2
 text = "Novo Jogo"

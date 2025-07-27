@@ -42,6 +42,7 @@ func get_remaining_count() -> int:
 
 func reset():
 	"""Reinicia o conjunto completo"""
+	shuffle()
 	generate_full_set()
 
 func has_piece(piece: Dictionary) -> bool:

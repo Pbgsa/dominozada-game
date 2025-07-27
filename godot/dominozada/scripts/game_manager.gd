@@ -26,8 +26,7 @@ enum GameState {
 
 enum GameOverReason {
 	EMPTY_HAND,
-	ALL_PASSED,
-	BLOCKED_GAME
+	ALL_PASSED
 }
 
 var current_state: GameState = GameState.MENU
@@ -37,7 +36,6 @@ var domino_set: RefCounted
 var players: Array[RefCounted] = []
 var board: Node
 var consecutive_passes: int = 0
-var game_blocked: bool = false
 
 func _ready():
 	# Inicializar componentes do jogo
@@ -51,15 +49,15 @@ func _ready():
 	board = get_tree().current_scene if get_tree().current_scene.has_method("can_place_piece") else null
 	
 	if board:
-		print("✅ Board encontrado com sucesso!")
+		print("Board encontrado com sucesso!")
 	else:
-		print("⚠️ Board não encontrado - tentando localizar...")
+		print("Board não encontrado - tentando localizar...")
 		# Tentar encontrar o board na cena atual
 		var scene_root = get_tree().current_scene
 		for child in scene_root.get_children():
 			if child.has_method("can_place_piece"):
 				board = child
-				print("✅ Board encontrado:", child.name)
+				print("Board encontrado:", child.name)
 				break
 
 func setup_players():
@@ -81,15 +79,13 @@ func setup_players():
 
 func start_new_game():
 	"""Inicia uma nova partida"""
-	print("🎮 Iniciando novo jogo...")
+	print("Iniciando novo jogo...")
 	current_state = GameState.PLAYING
 	current_player = 0
 	consecutive_passes = 0
-	game_blocked = false
 	
 	# Resetar conjunto de dominó
 	domino_set.reset()
-	domino_set.shuffle()
 	
 	# Limpar board se existir
 	if board and board.has_method("clear_board"):
@@ -101,7 +97,7 @@ func start_new_game():
 	# Jogador humano sempre começa
 	current_player = 0
 	
-	print("🎯 Primeiro jogador: ", players[current_player].player_name)
+	print("Primeiro jogador: ", players[current_player].player_name)
 	
 	game_started.emit()
 	turn_changed.emit(current_player)
@@ -137,21 +133,21 @@ func find_first_player() -> int:
 func play_piece(player_id: int, piece: Dictionary, side: String) -> bool:
 	"""Tenta jogar uma peça"""
 	if current_player != player_id or current_state != GameState.PLAYING:
-		print("❌ Jogada rejeitada: não é o turno do jogador ou jogo não está ativo")
+		print("Jogada rejeitada: não é o turno do jogador ou jogo não está ativo")
 		return false
 	
 	var player = players[player_id]
 	if not player.has_piece(piece):
-		print("❌ Jogada rejeitada: jogador não tem a peça")
+		print("Jogada rejeitada: jogador não tem a peça")
 		return false
 	
 	# Validar jogada no tabuleiro
 	if not board:
-		print("❌ Erro: Board não encontrado!")
+		print("Erro: Board não encontrado!")
 		return false
 		
 	if board.can_place_piece(piece, side):
-		print("✅ Jogando peça [%d,%d] no lado %s" % [piece.a, piece.b, side])
+		print("Jogando peça [%d,%d] no lado %s" % [piece.a, piece.b, side])
 		board.place_piece(piece, side)
 		player.remove_piece_from_hand(piece)
 		consecutive_passes = 0
@@ -171,7 +167,7 @@ func play_piece(player_id: int, piece: Dictionary, side: String) -> bool:
 		next_turn()
 		return true
 	else:
-		print("❌ Jogada rejeitada: peça não pode ser colocada no lado especificado")
+		print("Jogada rejeitada: peça não pode ser colocada no lado especificado")
 	
 	return false
 
@@ -248,8 +244,6 @@ func get_game_over_reason_text(reason: GameOverReason) -> String:
 			return "Mão vazia!"
 		GameOverReason.ALL_PASSED:
 			return "Todos passaram - vencedor por pontos!"
-		GameOverReason.BLOCKED_GAME:
-			return "Jogo bloqueado!"
 		_:
 			return "Jogo terminado!"
 

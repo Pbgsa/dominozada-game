@@ -1,12 +1,12 @@
 extends CanvasLayer
 
-@onready var turn_label := $Control/TurnInfo/TurnLabel
-@onready var pass_button := $Control/ActionButtons/PassButton
-@onready var start_button := $Control/ActionButtons/StartButton
-@onready var game_over_panel := $Control/GameOverPanel
-@onready var winner_label := $Control/GameOverPanel/VBox/WinnerLabel
-@onready var reason_label := $Control/GameOverPanel/VBox/ReasonLabel
-@onready var new_game_button := $Control/GameOverPanel/VBox/NewGameButton
+@onready var turn_label := $MainContainer/TurnInfo/TurnLabel
+@onready var pass_button := $MainContainer/ActionButtons/PassButton
+@onready var start_button := $MainContainer/ActionButtons/StartButton
+@onready var game_over_panel := $MainContainer/GameOverPanel
+@onready var winner_label := $MainContainer/GameOverPanel/GameOverContent/WinnerLabel
+@onready var reason_label := $MainContainer/GameOverPanel/GameOverContent/ReasonLabel
+@onready var new_game_button := $MainContainer/GameOverPanel/GameOverContent/NewGameButton
 
 var game_manager: Node
 
@@ -27,7 +27,7 @@ func _ready():
 	new_game_button.pressed.connect(_on_new_game_button_pressed)
 	
 	# UI inicial - permitir inputs passarem através por padrão
-	$Control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$MainContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	update_ui_state()
 
 func _on_turn_changed(player_id: int):
@@ -50,7 +50,7 @@ func _on_game_over(winner_id: int, reason: String):
 	pass_button.visible = false
 	
 	# Quando game over está visível, interceptar inputs para modal
-	$Control.mouse_filter = Control.MOUSE_FILTER_STOP
+	$MainContainer.mouse_filter = Control.MOUSE_FILTER_STOP
 
 func _on_game_started():
 	"""Jogo iniciado"""
@@ -59,7 +59,7 @@ func _on_game_started():
 	update_ui_state()
 	
 	# Permitir inputs passarem através quando não em game over
-	$Control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$MainContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _on_player_passed(player_id: int):
 	"""Jogador passou a vez"""
@@ -84,7 +84,7 @@ func _on_new_game_button_pressed():
 	if game_manager:
 		game_manager.start_new_game()
 		# Permitir inputs passarem através
-		$Control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		$MainContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func update_ui_state():
 	"""Atualiza estado geral da UI"""
@@ -96,14 +96,14 @@ func update_ui_state():
 			game_over_panel.visible = false
 			turn_label.text = "Pressione Iniciar Jogo"
 			# No menu, permitir inputs passarem através
-			$Control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			$MainContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			
 		1:  # PLAYING
 			start_button.visible = false
 			pass_button.visible = game_manager.is_human_turn()
 			game_over_panel.visible = false
 			# Durante o jogo, permitir inputs passarem através
-			$Control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			$MainContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			
 		2:  # GAME_OVER
 			pass_button.visible = false
@@ -132,7 +132,7 @@ func show_temporary_message(message: String):
 		temp_label.add_theme_color_override("font_shadow_color", Color.BLACK)
 		temp_label.add_theme_constant_override("shadow_offset_x", 2)
 		temp_label.add_theme_constant_override("shadow_offset_y", 2)
-		$Control.add_child(temp_label)
+		$MainContainer.add_child(temp_label)
 	
 	# Configurar mensagem
 	temp_label.text = message

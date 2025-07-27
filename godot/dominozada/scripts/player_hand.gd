@@ -33,7 +33,7 @@ func _ready():
 		game_manager.piece_played.connect(_on_piece_played)
 
 func add_piece(a: int, b: int):
-	print("➕ Adicionando peça [%d,%d] à mão" % [a, b])
+	print("Adicionando peça [%d,%d] à mão" % [a, b])
 	var button = piece_button_scene.instantiate()
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	add_child(button)
@@ -41,7 +41,7 @@ func add_piece(a: int, b: int):
 	await get_tree().process_frame
 	button.set_piece_values(a, b, "up")
 	button.pressed.connect(func(): _on_piece_selected(button))
-	print("🔗 Botão da peça [%d,%d] conectado" % [a, b])
+	print("Botão da peça [%d,%d] conectado" % [a, b])
 	
 	var piece_data = {"a": a, "b": b, "dir": "up"}
 	hand_pieces.append(piece_data)
@@ -49,23 +49,23 @@ func add_piece(a: int, b: int):
 
 func _on_piece_selected(button):
 	var piece_data = button.get_piece_values()
-	print("🎯 Peça selecionada: [%d,%d]" % [piece_data.a, piece_data.b])
+	print("Peça selecionada: [%d,%d]" % [piece_data.a, piece_data.b])
 	
 	# Verificar se é o turno do jogador humano (só se GameManager estiver ativo)
 	if game_manager and game_manager.current_state == 1:  # 1 = PLAYING
-		print("🎮 GameManager ativo, verificando turno...")
+		print("GameManager ativo, verificando turno...")
 		if not game_manager.is_human_turn():
 			show_invalid_move_message(piece_data, "Não é seu turno!")
 			return
 	else:
-		print("🔄 Modo fallback (sem GameManager ou jogo não iniciado)")
+		print("Modo fallback (sem GameManager ou jogo não iniciado)")
 	
 	# Clear previous selection visual
 	clear_selection_visual()
 	
 	# Check if piece can be played and get available sides
 	var connection_info = board_reference.get_connection_info(piece_data.a, piece_data.b)
-	print("🔍 Informação de conexão: ", connection_info)
+	print("Informação de conexão: ", connection_info)
 	
 	if not connection_info.can_connect:
 		show_invalid_move_message(piece_data, "Esta peça não pode ser jogada!")
@@ -77,22 +77,22 @@ func _on_piece_selected(button):
 	
 	# Determine available placement sides
 	var available_sides = get_available_sides(piece_data)
-	print("📍 Lados disponíveis: ", available_sides)
+	print("Lados disponíveis: ", available_sides)
 	
 	if available_sides.size() == 0:
 		show_invalid_move_message(piece_data, "Nenhuma jogada possível!")
 		clear_selection_visual()
 	elif available_sides.size() == 1:
-		print("✅ Apenas um lado disponível, jogando automaticamente...")
+		print("Apenas um lado disponível, jogando automaticamente...")
 		# Only one option, place directly
 		_on_placement_side_selected(available_sides[0], piece_data)
 	else:
-		print("🎲 Múltiplas opções, mostrando UI de seleção...")
+		print("Múltiplas opções, mostrando UI de seleção...")
 		# Multiple options, show placement UI
 		if placement_options:
 			placement_options.show_options(piece_data, available_sides)
 		else:
-			print("❌ Erro: placement_options não encontrado!")
+			print("Erro: placement_options não encontrado!")
 
 func get_available_sides(piece_data: Dictionary) -> Array[String]:
 	"""Get available placement sides for a piece"""
@@ -166,7 +166,7 @@ func remove_piece_from_hand(piece_data: Dictionary):
 
 func show_invalid_move_message(piece_data: Dictionary, custom_message: String = ""):
 	"""Shows message when a move is invalid"""
-	var message = "❌ JOGADA INVALIDA: Peça [%d,%d] não pode ser colocada no tabuleiro!" % [piece_data.a, piece_data.b]
+	var message = "JOGADA INVALIDA: Peça [%d,%d] não pode ser colocada no tabuleiro!" % [piece_data.a, piece_data.b]
 	print(message)
 	
 	# Show visual notification
@@ -188,22 +188,22 @@ func clear_hand():
 
 func _setup_ui():
 	"""Setup UI elements after the scene is ready"""
-	print("🔧 Configurando UI do player_hand...")
+	print("Configurando UI do player_hand...")
 	
 	# Create placement options UI
 	placement_options = placement_options_scene.instantiate()
 	get_tree().current_scene.add_child(placement_options)
 	placement_options.side_selected.connect(_on_placement_side_selected)
 	placement_options.placement_cancelled.connect(_on_placement_cancelled)
-	print("✅ placement_options criado e conectado")
+	print("placement_options criado e conectado")
 	
 	# Create invalid move message UI
 	if invalid_message_scene:
 		invalid_message = invalid_message_scene.instantiate() 
 		get_tree().current_scene.add_child(invalid_message)
-		print("✅ invalid_message criado")
+		print("invalid_message criado")
 	else:
-		print("⚠️ invalid_message_scene não encontrado")
+		print("invalid_message_scene não encontrado")
 
 func _on_game_started():
 	"""Limpa a mão quando o jogo inicia"""
@@ -224,5 +224,5 @@ func update_hand_from_player(player: RefCounted):
 func _on_piece_played(player_id: int, piece: Dictionary):
 	"""Chamada quando uma peça é jogada pelo GameManager"""
 	if player_id == 0:  # Só remove da UI se for o jogador humano
-		print("🎯 Removendo peça [%d,%d] da UI após jogada" % [piece.a, piece.b])
+		print("Removendo peça [%d,%d] da UI após jogada" % [piece.a, piece.b])
 		remove_piece_from_hand(piece)
