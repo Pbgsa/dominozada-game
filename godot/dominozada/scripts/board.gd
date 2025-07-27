@@ -311,6 +311,7 @@ func add_piece_to_board_on_side(data: Dictionary, placement_side: String):
 		create_visual_piece_at_center()
 		return
 	
+	print("DEEBBUUGG: [%d,%d] no lado %s" % [piece_a, piece_b, placement_side])
 	# Place piece on specified side
 	match placement_side:
 		"left":
@@ -320,6 +321,9 @@ func add_piece_to_board_on_side(data: Dictionary, placement_side: String):
 			elif piece_b == left_value:
 				pieces_sequence.push_front({"a": piece_a, "b": piece_b})
 				left_value = piece_a
+			else: #GATO COM LEBRE
+				#falta poder escolher que lado jogar
+				pieces_sequence.push_front({"a": piece_a, "b": piece_b})
 			create_visual_piece_at_side("left")
 			
 		"right":
@@ -329,6 +333,9 @@ func add_piece_to_board_on_side(data: Dictionary, placement_side: String):
 			elif piece_b == right_value:
 				pieces_sequence.append({"a": piece_b, "b": piece_a})
 				right_value = piece_a
+			else: #GATO COM LEBRE
+				#falta poder escolher que lado jogar
+				pieces_sequence.append({"a": piece_a, "b": piece_b})
 			create_visual_piece_at_side("right")
 	
 	update_head_positions()
@@ -364,6 +371,10 @@ func get_connection_info(piece_a: int, piece_b: int) -> Dictionary:
 		info.can_connect = true
 		info.side = "right"
 		info.connection_value = piece_b
+		return info
+
+	if game_manager.current_mode == game_manager.GameMode.GATO_COM_LEBRE:
+		info.can_connect = true
 		return info
 	
 	return info

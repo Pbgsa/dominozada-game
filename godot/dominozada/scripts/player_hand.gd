@@ -77,6 +77,10 @@ func _on_piece_selected(button):
 	
 	# Determine available placement sides
 	var available_sides = get_available_sides(piece_data)
+	if available_sides.size() == 0 and game_manager.current_mode == game_manager.GameMode.GATO_COM_LEBRE:
+		available_sides.append("left")
+		available_sides.append("right")
+		print("Adicionando lados padrão para Gato com Lebre: left e right")
 	print("Lados disponíveis: ", available_sides)
 	
 	if available_sides.size() == 0:

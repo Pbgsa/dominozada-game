@@ -29,13 +29,21 @@ enum GameOverReason {
 	ALL_PASSED
 }
 
+enum GameMode {
+	CLASSICO,
+	GATO_COM_LEBRE
+}
+
 var current_state: GameState = GameState.MENU
+var current_mode: GameMode = GameMode.CLASSICO
 var current_player: int = 0  # 0 = jogador humano, 1-3 = bots
 var players_count: int = 4
 var domino_set: RefCounted
 var players: Array[RefCounted] = []
 var board: Node
 var consecutive_passes: int = 0
+var last_invalid_move: Dictionary = {}  # { player_id, piece, side, round }
+var current_round: int = 0
 
 func _ready():
 	# Inicializar componentes do jogo
@@ -81,6 +89,8 @@ func start_new_game():
 	"""Inicia uma nova partida"""
 	print("Iniciando novo jogo...")
 	current_state = GameState.PLAYING
+	# Altere o modo de jogo aqui (posteriormente deve ser alterado pelo menu)
+	current_mode = GameMode.GATO_COM_LEBRE
 	current_player = 0
 	consecutive_passes = 0
 	
@@ -166,6 +176,30 @@ func play_piece(player_id: int, piece: Dictionary, side: String) -> bool:
 		# Próximo turno
 		next_turn()
 		return true
+	elif current_mode == GameMode.GATO_COM_LEBRE:
+		# Armazenar a jogada inválida para possível denúncia
+		last_invalid_move = {
+			"player_id": player_id,
+			"piece": piece,
+			"side": side,
+			"round": current_round
+		}
+
+		print("Jogada inválida permitida no modo Gato com Lebre!")
+		print("Última jogada inválida:", last_invalid_move)
+		board.place_piece(piece, side) # ver se vai funcionar mesmo
+		player.remove_piece_from_hand(piece)
+		consecutive_passes = 0
+
+		piece_played.emit(player_id, piece)
+		player_hand_changed.emit(player_id, player.get_hand_count())
+		
+		if player.get_hand_count() == 0:
+			end_game(player_id, GameOverReason.EMPTY_HAND)
+			return true
+		
+		next_turn()
+		return true
 	else:
 		print("Jogada rejeitada: peça não pode ser colocada no lado especificado")
 	
@@ -188,6 +222,7 @@ func pass_turn(player_id: int):
 
 func next_turn():
 	"""Avança para o próximo jogador"""
+	current_round += 1  # Incrementa rodada
 	current_player = (current_player + 1) % players_count
 	turn_changed.emit(current_player)
 	
