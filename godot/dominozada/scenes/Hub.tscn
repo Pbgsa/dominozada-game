@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://syp3k0y8gcwb"]
+
+[ext_resource type="Script" uid="uid://bxm1gp1mn0nd0" path="res://scripts/hub.gd" id="1_8mbd6"]
+
+[node name="Hub" type="Node2D"]
+script = ExtResource("1_8mbd6")
+
+[node name="HostButton" type="Button" parent="."]
+offset_left = 494.0
+offset_top = 34.0
+offset_right = 617.0
+offset_bottom = 87.0
+text = "Host
+"
+
+[node name="JoinButton" type="Button" parent="."]
+offset_left = 286.0
+offset_top = 31.0
+offset_right = 445.0
+offset_bottom = 86.0
+text = "Join"
+
+[node name="StartButton" type="Button" parent="."]
+offset_left = 931.0
+offset_top = 32.0
+offset_right = 1086.0
+offset_bottom = 83.0
+text = "Iniciar Jogo"
+
+[node name="IPInput" type="LineEdit" parent="."]
+offset_left = 82.0
+offset_top = 33.0
+offset_right = 239.0
+offset_bottom = 87.0
+placeholder_text = "IP do Servidor"
+
+[node name="PlayerList" type="VBoxContainer" parent="."]
+offset_left = 84.0
+offset_top = 104.0
+offset_right = 1088.0
+offset_bottom = 468.0
