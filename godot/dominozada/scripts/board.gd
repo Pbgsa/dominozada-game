@@ -26,6 +26,9 @@ func _ready():
 	
 	# Conectar com o GameManager se existir
 	game_manager = get_node("/root/GameManager") if has_node("/root/GameManager") else null
+	
+	if game_manager:
+		game_manager.start_new_game(self)
 
 func _on_piece_played(piece_data: Dictionary, placement_side: String):
 	# For first piece, ignore placement_side

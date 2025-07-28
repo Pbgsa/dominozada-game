@@ -30,7 +30,7 @@ enum GameOverReason {
 }
 
 var current_state: GameState = GameState.MENU
-var current_player: int = 0  # 0 = jogador humano, 1-3 = bots
+var current_player: int = 0 # 0 = jogador humano, 1-3 = bots
 var players_count: int = 4
 var domino_set: RefCounted
 var players: Array[RefCounted] = []
@@ -42,23 +42,6 @@ func _ready():
 	domino_set = DominoSetScript.new()
 	setup_players()
 	
-	# Aguardar um frame para garantir que a cena esteja carregada
-	await get_tree().process_frame
-	
-	# Obter referência ao board
-	board = get_tree().current_scene if get_tree().current_scene.has_method("can_place_piece") else null
-	
-	if board:
-		print("Board encontrado com sucesso!")
-	else:
-		print("Board não encontrado - tentando localizar...")
-		# Tentar encontrar o board na cena atual
-		var scene_root = get_tree().current_scene
-		for child in scene_root.get_children():
-			if child.has_method("can_place_piece"):
-				board = child
-				print("Board encontrado:", child.name)
-				break
 
 func setup_players():
 	"""Configura os jogadores do jogo"""
@@ -77,9 +60,11 @@ func setup_players():
 		bot.player_name = "Bot " + str(i)
 		players.append(bot)
 
-func start_new_game():
+func start_new_game(game_board: Node):
 	"""Inicia uma nova partida"""
 	print("Iniciando novo jogo...")
+	board = game_board
+	
 	current_state = GameState.PLAYING
 	current_player = 0
 	consecutive_passes = 0
@@ -192,7 +177,7 @@ func next_turn():
 	turn_changed.emit(current_player)
 	
 	# Se for bot, executar jogada automaticamente
-	if current_player != 0:  # Bot players têm ID > 0
+	if current_player != 0: # Bot players têm ID > 0
 		call_deferred("execute_bot_turn")
 
 func execute_bot_turn():
