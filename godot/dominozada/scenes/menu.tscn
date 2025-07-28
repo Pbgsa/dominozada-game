@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://02yun2wu5mjn"]
+
+[ext_resource type="Script" uid="uid://b2cfapucky8tp" path="res://menu.gd" id="1_yqeox"]
+
+[node name="menu" type="Node2D"]
+script = ExtResource("1_yqeox")
+
+[node name="OnlineButton" type="Button" parent="."]
+offset_left = 227.0
+offset_top = 407.0
+offset_right = 436.0
+offset_bottom = 492.0
+text = "Online"
+
+[node name="OfflineButton" type="Button" parent="."]
+offset_left = 592.0
+offset_top = 406.0
+offset_right = 792.0
+offset_bottom = 488.0
+text = "Offline
+"
+
+[connection signal="pressed" from="OnlineButton" to="." method="_on_online_button_pressed"]
+[connection signal="pressed" from="OfflineButton" to="." method="_on_offline_button_pressed"]
