@@ -235,5 +235,10 @@ func return_piece_to_hand(player_id: int, piece: Dictionary):
 	#players = game_manager.players if game_manager else []
 	for player in game_manager.players:
 		if player.player_id == player_id:
-			add_piece(piece.a, piece.b)
+			print("Retornando peça [%d,%d] à mão do jogador %d" % [piece.a, piece.b, player_id])
+			if (player_id == 0):
+				player.add_piece_to_hand(piece)
+				add_piece(piece.a, piece.b)
+			else: 
+				player.add_piece_to_hand(piece)
 			game_manager.player_hand_changed.emit(player_id, player.get_hand_count())

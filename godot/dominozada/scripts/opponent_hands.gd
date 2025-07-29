@@ -36,13 +36,13 @@ func _on_player_hand_changed(player_id: int, new_count: int):
 	# player_id 3 = oponente da direita
 	
 	match player_id:
-		1:  # Top opponent
+		2:  # Top opponent
 			if top_hand:
 				top_hand.set_piece_count(new_count, "up")
-		2:  # Left opponent
+		3:  # Left opponent
 			if left_hand:
 				left_hand.set_piece_count(new_count, "left")
-		3:  # Right opponent
+		1:  # Right opponent
 			if right_hand:
 				right_hand.set_piece_count(new_count, "right")
 

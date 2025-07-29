@@ -233,6 +233,7 @@ func next_turn():
 func execute_bot_turn():
 	"""Executa o turno do bot"""
 	var bot = players[current_player]
+	var is_gato_com_lebre = (current_mode == GameMode.GATO_COM_LEBRE)
 	
 	# Adicionar delay para tornar o jogo mais natural
 	await get_tree().create_timer(2).timeout
@@ -242,7 +243,7 @@ func execute_bot_turn():
 	if current_state != GameState.PLAYING:
 		return
 	
-	var move = bot.decide_move(board, last_invalid_move)
+	var move = bot.decide_move(board, last_invalid_move, is_gato_com_lebre)
 	
 	if move.has("piece") and move.has("side"):
 		await get_tree().create_timer(2).timeout

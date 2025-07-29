@@ -9,7 +9,7 @@ enum BotDifficulty {
 
 var difficulty: BotDifficulty = BotDifficulty.EASY
 
-func decide_move(board: Node, last_invalid_move: Dictionary) -> Dictionary:
+func decide_move(board: Node, last_invalid_move: Dictionary, is_gato_com_lebre: bool) -> Dictionary:
 	"""Decide qual jogada fazer"""
 	var playable_pieces = get_playable_pieces(board)
 
@@ -22,7 +22,7 @@ func decide_move(board: Node, last_invalid_move: Dictionary) -> Dictionary:
 		else:
 			print("A jogada inválida passou despercebida.")
 
-	if playable_pieces.is_empty():
+	if playable_pieces.is_empty() and not is_gato_com_lebre:
 		return {}  # Sem jogadas possíveis - vai passar a vez
 	
 	match difficulty:
@@ -36,7 +36,18 @@ func decide_move(board: Node, last_invalid_move: Dictionary) -> Dictionary:
 			return decide_easy_move(board, playable_pieces)
 
 func decide_easy_move(board: Node, playable_pieces: Array[Dictionary]) -> Dictionary:
+	# se chegou até aqui, significa que pode tentar gato com lebre
+	if playable_pieces.is_empty() and randf() < 1: # (100% pra debug) 25% chance de passar a vez
+		var pieces_in_hand = get_hand_pieces()
+		var side = "left" if randf() < 0.5 else "right"
+		if pieces_in_hand.is_empty():
+			return {}  # Sem peças na mão, não pode jogar
+		else:
+			return {"piece": pieces_in_hand[0], "side": side}
+
+
 	"""Estratégia simples: joga a primeira peça possível"""
+
 	var piece = playable_pieces[0]
 	var side = get_preferred_side(board, piece)
 	
