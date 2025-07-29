@@ -52,6 +52,10 @@ text = "Passar Vez"
 layout_mode = 2
 text = "Iniciar Jogo"
 
+[node name="ReportButton" type="Button" parent="MainContainer/ActionButtons"]
+layout_mode = 2
+text = "Denunciar"
+
 [node name="GameOverPanel" type="Panel" parent="MainContainer"]
 visible = false
 layout_mode = 1

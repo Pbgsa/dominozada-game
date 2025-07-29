@@ -3,6 +3,7 @@ extends CanvasLayer
 @onready var turn_label := $MainContainer/TurnInfo/TurnLabel
 @onready var pass_button := $MainContainer/ActionButtons/PassButton
 @onready var start_button := $MainContainer/ActionButtons/StartButton
+@onready var report_button := $MainContainer/ActionButtons/ReportButton
 @onready var game_over_panel := $MainContainer/GameOverPanel
 @onready var winner_label := $MainContainer/GameOverPanel/GameOverContent/WinnerLabel
 @onready var reason_label := $MainContainer/GameOverPanel/GameOverContent/ReasonLabel
@@ -24,6 +25,7 @@ func _ready():
 	# Conectar botões
 	pass_button.pressed.connect(_on_pass_button_pressed)
 	start_button.pressed.connect(_on_start_button_pressed)
+	report_button.pressed.connect(_on_report_button_pressed)
 	new_game_button.pressed.connect(_on_new_game_button_pressed)
 	
 	# UI inicial - permitir inputs passarem através por padrão
@@ -79,6 +81,9 @@ func _on_start_button_pressed():
 	if game_manager:
 		game_manager.start_new_game()
 
+func _on_report_button_pressed():
+	print("Reportar jogo")
+
 func _on_new_game_button_pressed():
 	"""Reinicia o jogo após game over"""
 	if game_manager:
@@ -93,6 +98,7 @@ func update_ui_state():
 		0:  # MENU
 			start_button.visible = true
 			pass_button.visible = false
+			report_button.visible = false
 			game_over_panel.visible = false
 			turn_label.text = "Pressione Iniciar Jogo"
 			# No menu, permitir inputs passarem através
@@ -101,12 +107,14 @@ func update_ui_state():
 		1:  # PLAYING
 			start_button.visible = false
 			pass_button.visible = game_manager.is_human_turn()
+			report_button.visible = true
 			game_over_panel.visible = false
 			# Durante o jogo, permitir inputs passarem através
 			$MainContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			
 		2:  # GAME_OVER
 			pass_button.visible = false
+			report_button.visible = false
 			game_over_panel.visible = true
 			# No game over, interceptar inputs para modal
 			$Control.mouse_filter = Control.MOUSE_FILTER_STOP
