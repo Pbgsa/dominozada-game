@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dp60ecnv41070" path="res://scenes/opponent_hands.tscn" id="4_fv4ni"]
 [ext_resource type="PackedScene" uid="uid://bp3vhadl5ywo1" path="res://scenes/change_background_button.tscn" id="5_dxjtj"]
 [ext_resource type="PackedScene" uid="uid://1nodedq6gwob" path="res://scenes/game_ui.tscn" id="6_game_ui"]
-[ext_resource type="Script" path="res://scripts/GameManager.gd" id="7_c3r7o"]
+[ext_resource type="Script" uid="uid://bds5waf8c1fyw" path="res://scripts/GameManager.gd" id="7_c3r7o"]
 
 [node name="Board" type="Node2D"]
 script = ExtResource("1_tx6nw")

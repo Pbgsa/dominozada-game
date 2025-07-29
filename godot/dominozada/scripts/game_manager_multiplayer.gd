@@ -78,7 +78,7 @@ func server_play_piece(piece_data: Dictionary, side: String):
 		if player_hand[i].a == piece_data.a and player_hand[i].b == piece_data.b:
 			player_hand.remove_at(i)
 			break
-	_update_board_state(piece_data, side)
+	rpc("_update_board_state",piece_data, side)
 	rpc("client_play_piece", piece_data, side, sender_id)
 	rpc("client_update_player_hand_count", sender_id, player_hand.size())
 	passes_in_a_row = 0
@@ -97,6 +97,7 @@ func get_valid_sides_for_piece(piece_data: Dictionary) -> Array[String]:
 		valid_sides.append("right")
 	return valid_sides
 
+@rpc("authority","call_local","reliable")
 func _update_board_state(piece_data: Dictionary, side: String):
 	var connecting_value = board_left_value if side == "left" else board_right_value
 	if board_is_empty:
