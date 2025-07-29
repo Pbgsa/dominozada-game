@@ -42,10 +42,11 @@ func _on_piece_played_on_board(piece_data: Dictionary, side: String, _player_id:
 		board_right_value = piece_data.b
 		board_is_empty = false
 		
+		rotation_needed = PI / 2 if is_double else PI
 		new_piece_node.position = Vector2.ZERO
 		new_piece_node.rotation = rotation_needed
 		
-		var piece_width = 40.0 if not is_double else 20.0
+		var piece_width = (20.0 if not is_double else 10.0)/2.0
 		left_head_pos = Vector2(-piece_width, 0)
 		right_head_pos = Vector2(piece_width, 0)
 		visual_pieces.append(new_piece_node)
@@ -70,16 +71,24 @@ func _on_piece_played_on_board(piece_data: Dictionary, side: String, _player_id:
 		var offset = (40.0 / 2.0) + ( (40.0 if not is_double else 20.0) / 2.0 )
 		var direction_vector = Vector2.RIGHT if side == "right" else Vector2.LEFT
 		
+		print(right_head_pos)
+		print(left_head_pos)
+		
 		new_piece_node.rotation = rotation_needed
 		new_piece_node.position = head_pos + (direction_vector * offset)
 
-		var new_head_offset = (40.0 if not is_double else 20.0) / 2.0
+		var new_head_offset = (20.0 if not is_double else 10.0) / 2.0
+		print(new_head_offset)
 		if side == "right":
 			right_head_pos = new_piece_node.position + (direction_vector * new_head_offset)
+			new_piece_node.rotation += PI
 			visual_pieces.append(new_piece_node)
 		else:
 			left_head_pos = new_piece_node.position + (direction_vector * new_head_offset)
-			visual_pieces.push_front(new_piece_node)
+			visual_pieces.append(new_piece_node)
+			
+		print(right_head_pos)
+		print(left_head_pos)
 
 # --- CORREÇÃO: Limpa também as variáveis de estado lógico ---
 func clear_board():
