@@ -242,15 +242,17 @@ func execute_bot_turn():
 	if current_state != GameState.PLAYING:
 		return
 	
-	var move = bot.decide_move(board)
+	var move = bot.decide_move(board, last_invalid_move)
 	
 	if move.has("piece") and move.has("side"):
 		await get_tree().create_timer(2).timeout
+		last_invalid_move = {}  # Limpar jogada inválida após jogada válida do bot
 		var side_text = "esquerda" if move.side == "left" else "direita"
 		bot_action_message.emit("%s jogou na %s" % [bot.player_name, side_text])
 		play_piece(current_player, move.piece, move.side)
 	else:
 		await get_tree().create_timer(2).timeout
+		last_invalid_move = {}  # Limpar jogada inválida após bot passar a vez
 		bot_action_message.emit("%s passou a vez" % bot.player_name)
 		pass_turn(current_player)
 

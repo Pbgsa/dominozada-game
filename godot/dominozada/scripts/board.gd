@@ -399,6 +399,68 @@ func place_piece(piece: Dictionary, side: String):
 	else:
 		add_piece_to_board_on_side(piece, side)
 
+func remove_piece(last_invalid_move: Dictionary): # { player_id, piece, side, round }
+	"""Remove a piece from the board (used for invalid moves)"""
+	print("Tentando remover peça inválida do tabuleiro: ", last_invalid_move)
+
+	if pieces_sequence.is_empty():
+		print("Erro: Não há peças no tabuleiro para remover.")
+		return
+	
+	var invalid_piece_player_id = last_invalid_move["player_id"]
+	var invalid_piece = last_invalid_move["piece"]
+	var invalid_piece_side = last_invalid_move["side"]
+
+	# Primeiro, retira a peça do tabuleiro
+	remove_piece_from_a_side(invalid_piece, invalid_piece_side, invalid_piece_player_id)
+
+
+	# Depois, devolve a peça ao jogador infrator
+
+func remove_piece_from_a_side(piece: Dictionary, side: String, player_id: int):
+	"""Remove a piece from the specified side"""
+	if side == "left":
+		print("Peça comparada LEFT", pieces_sequence[0])
+		if pieces_sequence[0].a == piece.a and pieces_sequence[0].b == piece.b:
+			played_pieces.remove_child(visual_pieces[0])
+			pieces_sequence.pop_front()
+			remove_visual_at_side("left")
+			player_hand.return_piece_to_hand(player_id, piece)
+		elif pieces_sequence[0].a == piece.b and pieces_sequence[0].b == piece.a:
+			played_pieces.remove_child(visual_pieces[0])
+			pieces_sequence.pop_front()
+			remove_visual_at_side("left")
+			player_hand.return_piece_to_hand(player_id, piece)
+		else:
+			print("Erro: Peça não encontrada no lado esquerdo.")
+	elif side == "right":
+		print("Peça comparada RIGHT", pieces_sequence[pieces_sequence.size() - 1])
+		if pieces_sequence[pieces_sequence.size() - 1].a == piece.a and pieces_sequence[pieces_sequence.size() - 1].b == piece.b:
+			played_pieces.remove_child(visual_pieces[visual_pieces.size() - 1])
+			pieces_sequence.pop_back()
+			remove_visual_at_side("right")
+			player_hand.return_piece_to_hand(player_id, piece)
+		elif pieces_sequence[pieces_sequence.size() - 1].a == piece.b and pieces_sequence[pieces_sequence.size() - 1].b == piece.a:
+			played_pieces.remove_child(visual_pieces[visual_pieces.size() - 1])
+			pieces_sequence.pop_back()
+			remove_visual_at_side("right")
+			player_hand.return_piece_to_hand(player_id, piece)
+		else:
+			print("Erro: Peça não encontrada no lado direito.")
+	else:
+		print("Erro: Lado inválido para remoção de peça.")
+
+	update_head_positions()
+
+func remove_visual_at_side(side: String):
+	"""Remove the visual piece from the specified side"""
+	print("AAAAAAAAAAa", pieces_sequence)
+	if side == "left":
+		visual_pieces.pop_front()
+	else:
+		visual_pieces.pop_back()
+	print("BBBBBBBBBBBBBB", visual_pieces)
+
 func get_left_value() -> int:
 	"""Retorna o valor da extremidade esquerda"""
 	return left_value

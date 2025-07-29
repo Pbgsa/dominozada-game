@@ -230,3 +230,10 @@ func _on_piece_played(player_id: int, piece: Dictionary):
 	if player_id == 0:  # Só remove da UI se for o jogador humano
 		print("Removendo peça [%d,%d] da UI após jogada" % [piece.a, piece.b])
 		remove_piece_from_hand(piece)
+
+func return_piece_to_hand(player_id: int, piece: Dictionary):
+	#players = game_manager.players if game_manager else []
+	for player in game_manager.players:
+		if player.player_id == player_id:
+			add_piece(piece.a, piece.b)
+			game_manager.player_hand_changed.emit(player_id, player.get_hand_count())

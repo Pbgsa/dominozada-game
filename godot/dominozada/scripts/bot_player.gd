@@ -9,10 +9,19 @@ enum BotDifficulty {
 
 var difficulty: BotDifficulty = BotDifficulty.EASY
 
-func decide_move(board: Node) -> Dictionary:
+func decide_move(board: Node, last_invalid_move: Dictionary) -> Dictionary:
 	"""Decide qual jogada fazer"""
 	var playable_pieces = get_playable_pieces(board)
-	
+
+	if last_invalid_move.has("piece"):
+		# chama uma função para denunciar a jogada inválida
+		if try_to_report_invalid_move(board, last_invalid_move):
+			print("Jogada inválida denunciada com sucesso!")
+			# aqui vai ter de adicionar uma punição ao jogador (ou bot) anterior
+			board.remove_piece(last_invalid_move)
+		else:
+			print("A jogada inválida passou despercebida.")
+
 	if playable_pieces.is_empty():
 		return {}  # Sem jogadas possíveis - vai passar a vez
 	
@@ -74,3 +83,28 @@ func get_preferred_side(board: Node, piece: Dictionary) -> String:
 func set_difficulty(new_difficulty: BotDifficulty):
 	"""Define dificuldade do bot"""
 	difficulty = new_difficulty
+
+func try_to_report_invalid_move(board: Node, last_invalid_move: Dictionary) -> bool:
+	"""Tenta denunciar uma jogada inválida"""
+
+	match difficulty:
+		BotDifficulty.EASY:
+			if randf() < 1:  # (100% pra debug) 20% chance de denunciar
+				return true
+			else:
+				return false
+		BotDifficulty.MEDIUM:
+			if randf() < 0.45:  # 45% chance de denunciar
+				return true
+			else:
+				return false
+		BotDifficulty.HARD:
+			if randf() < 0.7:  # 70% chance de denunciar
+				return true
+			else:
+				return false
+		_:
+			if randf() < 0.2:  # 20% chance de denunciar
+				return true
+			else:
+				return false
