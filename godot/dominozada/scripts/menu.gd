@@ -1,7 +1,12 @@
+# scripts/menu.gd
 extends Node2D
 
 func _on_online_button_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes//Hub.tscn")
+	# Define o modo como online e vai para o Hub
+	NetworkManager.is_online_mode = true
+	get_tree().change_scene_to_file("res://scenes/Hub.tscn")
 
 func _on_offline_button_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes//board.tscn")
+	# Define o modo como offline e vai direto para o tabuleiro
+	NetworkManager.is_online_mode = false
+	get_tree().change_scene_to_file("res://scenes/board.tscn")

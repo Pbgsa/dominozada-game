@@ -1,0 +1,143 @@
+# scripts/game_manager_multiplayer.gd
+extends Node
+
+signal change_scene_to_game
+signal game_started
+signal hand_updated(my_hand)
+signal player_hand_count_changed(player_id, count)
+signal turn_changed(player_id)
+signal piece_played_on_board(piece_data, side, player_id)
+signal game_over(winner_id, reason)
+signal player_passed_turn(player_id)
+
+var domino_set = DominoSet.new()
+var players := {}
+var turn_order := []
+var current_turn_index := 0
+var board_left_value := -1
+var board_right_value := -1
+var board_is_empty := true
+var passes_in_a_row := 0
+var ready_players := []
+
+func _ready():
+	pass # IDs serão definidos na conexão
+
+func host_requests_start_game():
+	if not multiplayer.is_server(): return
+	ready_players.clear()
+	ready_players.append(1)
+	rpc("client_load_game_scene")
+
+@rpc("authority", "call_local", "reliable")
+func client_load_game_scene():
+	change_scene_to_game.emit()
+
+@rpc("any_peer", "reliable")
+func server_player_is_ready():
+	if not multiplayer.is_server(): return
+	var sender_id = multiplayer.get_remote_sender_id()
+	if not sender_id in ready_players: ready_players.append(sender_id)
+	if ready_players.size() == NetworkManager.players.size():
+		_start_actual_game()
+
+func _start_actual_game():
+	turn_order = multiplayer.get_peers()
+	turn_order.push_front(1)
+	turn_order.shuffle()
+	domino_set.generate_full_set()
+	domino_set.shuffle()
+	for peer_id in turn_order:
+		players[peer_id] = {"hand": []}
+		for i in range(7): players[peer_id].hand.append(domino_set.draw_piece())
+		rpc_id(peer_id, "client_receive_hand", players[peer_id].hand)
+	for peer_id in turn_order:
+		rpc("client_update_player_hand_count", peer_id, 7)
+	board_is_empty = true
+	passes_in_a_row = 0
+	current_turn_index = 0
+	rpc("client_start_game")
+	_set_turn(turn_order[current_turn_index])
+
+@rpc("any_peer", "call_local", "reliable")
+func server_play_piece(piece_data: Dictionary, side: String):
+	var sender_id = multiplayer.get_remote_sender_id()
+	if sender_id == 0: sender_id = 1
+	if sender_id != turn_order[current_turn_index]: return
+
+	var valid_sides = get_valid_sides_for_piece(piece_data)
+	if not side in valid_sides: return
+
+	var player_hand = players[sender_id].hand
+	for i in range(player_hand.size()):
+		if player_hand[i].a == piece_data.a and player_hand[i].b == piece_data.b:
+			player_hand.remove_at(i)
+			break
+	_update_board_state(piece_data, side)
+	rpc("client_play_piece", piece_data, side, sender_id)
+	rpc("client_update_player_hand_count", sender_id, player_hand.size())
+	passes_in_a_row = 0
+	if player_hand.is_empty():
+		rpc("client_game_over", sender_id, "O jogador não tem mais peças!")
+	else:
+		_next_turn()
+
+func get_valid_sides_for_piece(piece_data: Dictionary) -> Array[String]:
+	var valid_sides: Array[String] = []
+	if board_is_empty: return ["left"]
+	if piece_data.a == board_left_value or piece_data.b == board_left_value:
+		valid_sides.append("left")
+	if board_left_value == board_right_value and piece_data.a == piece_data.b: return valid_sides
+	if piece_data.a == board_right_value or piece_data.b == board_right_value:
+		valid_sides.append("right")
+	return valid_sides
+
+func _update_board_state(piece_data: Dictionary, side: String):
+	var connecting_value = board_left_value if side == "left" else board_right_value
+	if board_is_empty:
+		board_left_value = piece_data.a
+		board_right_value = piece_data.b
+		board_is_empty = false
+	else:
+		var new_head = piece_data.b if piece_data.a == connecting_value else piece_data.a
+		if side == "left": board_left_value = new_head
+		else: board_right_value = new_head
+
+@rpc("any_peer", "call_local", "reliable")
+func server_pass_turn():
+	var sender_id = multiplayer.get_remote_sender_id()
+	if sender_id == 0: sender_id = 1
+	if sender_id != turn_order[current_turn_index]: return
+	passes_in_a_row += 1
+	rpc("client_player_passed", sender_id)
+	if passes_in_a_row >= turn_order.size():
+		rpc("client_game_over", -1, "Jogo travado!")
+	else:
+		_next_turn()
+
+func _next_turn():
+	current_turn_index = (current_turn_index + 1) % turn_order.size()
+	_set_turn(turn_order[current_turn_index])
+func _set_turn(player_id: int):
+	rpc("client_set_turn", player_id)
+@rpc("authority", "call_local", "reliable")
+func client_receive_hand(hand: Array):
+	hand_updated.emit.call_deferred(hand)
+@rpc("authority", "call_local", "reliable")
+func client_update_player_hand_count(player_id: int, count: int):
+	player_hand_count_changed.emit(player_id, count)
+@rpc("authority", "call_local", "reliable")
+func client_start_game():
+	game_started.emit()
+@rpc("authority", "call_local", "reliable")
+func client_set_turn(player_id: int):
+	turn_changed.emit(player_id)
+@rpc("authority", "call_local", "reliable")
+func client_play_piece(piece_data: Dictionary, side: String, player_id: int):
+	piece_played_on_board.emit(piece_data, side, player_id)
+@rpc("authority", "call_local", "reliable")
+func client_player_passed(player_id: int):
+	player_passed_turn.emit(player_id)
+@rpc("authority", "call_local", "reliable")
+func client_game_over(winner_id: int, reason: String):
+	game_over.emit(winner_id, reason)
