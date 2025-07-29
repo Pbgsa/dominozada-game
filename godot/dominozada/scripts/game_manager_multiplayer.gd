@@ -37,6 +37,8 @@ func client_load_game_scene():
 func server_player_is_ready():
 	if not multiplayer.is_server(): return
 	var sender_id = multiplayer.get_remote_sender_id()
+	
+	if sender_id == 0: sender_id = 1
 	if not sender_id in ready_players: ready_players.append(sender_id)
 	if ready_players.size() == NetworkManager.players.size():
 		_start_actual_game()
@@ -63,6 +65,9 @@ func _start_actual_game():
 func server_play_piece(piece_data: Dictionary, side: String):
 	var sender_id = multiplayer.get_remote_sender_id()
 	if sender_id == 0: sender_id = 1
+	if turn_order.is_empty() or current_turn_index < 0 or current_turn_index >= turn_order.size():
+		push_error("turn_order está vazio ou current_turn_index fora do range!")
+		return
 	if sender_id != turn_order[current_turn_index]: return
 
 	var valid_sides = get_valid_sides_for_piece(piece_data)
@@ -107,6 +112,9 @@ func _update_board_state(piece_data: Dictionary, side: String):
 func server_pass_turn():
 	var sender_id = multiplayer.get_remote_sender_id()
 	if sender_id == 0: sender_id = 1
+	if turn_order.is_empty() or current_turn_index < 0 or current_turn_index >= turn_order.size():
+		push_error("turn_order está vazio ou current_turn_index fora do range!")
+		return
 	if sender_id != turn_order[current_turn_index]: return
 	passes_in_a_row += 1
 	rpc("client_player_passed", sender_id)
