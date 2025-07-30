@@ -89,7 +89,7 @@ func _on_piece_selected(button):
 	elif available_sides.size() == 1:
 		print("Apenas um lado disponível, jogando automaticamente...")
 		# Only one option, place directly
-		_on_placement_side_selected(available_sides[0], piece_data)
+		await _on_placement_side_selected(available_sides[0], piece_data)
 	else:
 		print("Múltiplas opções, mostrando UI de seleção...")
 		# Multiple options, show placement UI
@@ -133,7 +133,7 @@ func clear_selection_visual():
 func _on_placement_side_selected(side: String, piece_data: Dictionary):
 	"""Handle placement side selection"""
 	if game_manager and game_manager.current_state == 1:  # 1 = PLAYING state
-		var success = game_manager.play_piece(0, piece_data, side)  # 0 = jogador humano
+		var success = await game_manager.play_piece(0, piece_data, side)  # 0 = jogador humano
 		if success:
 			clear_selection_visual()
 		else:

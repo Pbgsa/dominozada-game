@@ -169,7 +169,7 @@ func play_piece(player_id: int, piece: Dictionary, side: String) -> bool:
 		player_hand_changed.emit(player_id, player.get_hand_count())
 		
 		# Verificar vitória
-		# delay aqui embaixo pfv
+		
 		if player.get_hand_count() == 0:
 			await get_tree().create_timer(3).timeout
 			if player.get_hand_count() == 0:
@@ -259,7 +259,7 @@ func execute_bot_turn():
 		last_invalid_move = {}  # Limpar jogada inválida após jogada válida do bot
 		var side_text = "esquerda" if move.side == "left" else "direita"
 		bot_action_message.emit("%s jogou na %s" % [bot.player_name, side_text])
-		play_piece(current_player, move.piece, move.side)
+		await play_piece(current_player, move.piece, move.side)
 	else:
 		await get_tree().create_timer(2).timeout
 		last_invalid_move = {}  # Limpar jogada inválida após bot passar a vez

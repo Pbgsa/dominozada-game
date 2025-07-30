@@ -37,13 +37,16 @@ func decide_move(board: Node, last_invalid_move: Dictionary, is_gato_com_lebre: 
 
 func decide_easy_move(board: Node, playable_pieces: Array[Dictionary]) -> Dictionary:
 	# se chegou até aqui, significa que pode tentar gato com lebre
-	if playable_pieces.is_empty() and randf() < 0.25: # 25% chance de passar a vez
-		var pieces_in_hand = get_hand_pieces()
-		var side = "left" if randf() < 0.5 else "right"
-		if pieces_in_hand.is_empty():
-			return {}  # Sem peças na mão, não pode jogar
+	if playable_pieces.is_empty():
+		if randf() < 0.25: # 25% de chance de jogar gato com lebre
+			var pieces_in_hand = get_hand_pieces()
+			var side = "left" if randf() < 0.5 else "right"
+			if pieces_in_hand.is_empty():
+				return {}  # Sem peças na mão, não pode jogar
+			else:
+				return {"piece": pieces_in_hand[0], "side": side}
 		else:
-			return {"piece": pieces_in_hand[0], "side": side}
+			return {}
 
 
 	"""Estratégia simples: joga a primeira peça possível"""
@@ -55,13 +58,16 @@ func decide_easy_move(board: Node, playable_pieces: Array[Dictionary]) -> Dictio
 
 func decide_medium_move(board: Node, playable_pieces: Array[Dictionary]) -> Dictionary:
 	# se chegou até aqui, significa que pode tentar gato com lebre
-	if playable_pieces.is_empty() and randf() < 0.5: # 50% chance de passar a vez
-		var pieces_in_hand = get_hand_pieces()
-		var side = "left" if randf() < 0.5 else "right"
-		if pieces_in_hand.is_empty():
-			return {}  # Sem peças na mão, não pode jogar
+	if playable_pieces.is_empty():
+		if randf() < 0.5: # 50% de chance de jogar gato com lebre
+			var pieces_in_hand = get_hand_pieces()
+			var side = "left" if randf() < 0.5 else "right"
+			if pieces_in_hand.is_empty():
+				return {}  # Sem peças na mão, não pode jogar
+			else:
+				return {"piece": pieces_in_hand[0], "side": side}
 		else:
-			return {"piece": pieces_in_hand[0], "side": side}
+			return {}
 
 	"""Estratégia média: prioriza peças com maior pontuação"""
 	var best_piece = playable_pieces[0]
