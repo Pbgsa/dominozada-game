@@ -251,7 +251,10 @@ func execute_bot_turn():
 				var side_text = "esquerda" if move.side == "left" else "direita"
 				bot_action_message.emit("%s jogou na %s" % [bot.player_name, side_text])
 				play_piece(current_player, move.piece, move.side)
-			pass_turn(current_player)	
+			else:
+				await get_tree().create_timer(2).timeout
+				bot_action_message.emit("%s passou a vez" % bot.player_name)
+				pass_turn(current_player)	
 	else:
 		if move.has("piece") and move.has("side"):
 			await get_tree().create_timer(2).timeout
