@@ -80,8 +80,8 @@ func _on_piece_selected(button: Button):
 	
 	if valid_sides.is_empty():
 		# Mostrar informações de debug das cabeças jogáveis  
-		print("Essa peça [%d,%d] não pode ser jogada." % [piece_data.a, piece_data.b])
-		_print_board_debug_info()
+		# print("Essa peça [%d,%d] não pode ser jogada." % [piece_data.a, piece_data.b])
+		# _print_board_debug_info()
 		show_invalid_move_message(piece_data, "Esta peça não pode ser jogada!")
 		return
 	
@@ -99,10 +99,10 @@ func _on_piece_selected(button: Button):
 func _is_player_turn() -> bool:
 	"""Verifica se é o turno do jogador atual"""
 	if NetworkManager.is_online_mode:
-		# No multiplayer, verificar se é nosso turno baseado no ID
-		var my_id = multiplayer.get_unique_id()
-		# Aqui você pode adicionar lógica específica do multiplayer para verificar turno
-		return true  # Por enquanto, sempre permitir (ajuste conforme necessário)
+		# TODO: no multiplayer, verificar se é nosso turno baseado no ID
+		print("AVISO: GameManager não tem método is_player_turn, assumindo que é sempre o turno do jogador.")
+		# Se não tiver método, assumir que é sempre o turno do jogador
+		return true
 	else:
 		# No modo offline, usar a função do GameManager
 		if game_manager.has_method("is_human_turn"):
@@ -110,29 +110,29 @@ func _is_player_turn() -> bool:
 		else:
 			return true  # Fallback
 
-func _print_board_debug_info():
-	"""Imprime informações de debug das cabeças do tabuleiro"""
-	# Tentar obter referência ao board para informações de debug
-	var board = null
-	if NetworkManager.is_online_mode:
-		# No multiplayer, tentar encontrar o board
-		board = get_tree().current_scene if get_tree().current_scene.has_method("get_board_left_value") else null
-	else:
-		# No offline, usar a referência do GameManager
-		if game_manager.has_method("board") and game_manager.board:
-			board = game_manager.board
+# func _print_board_debug_info():
+# 	"""Imprime informações de debug das cabeças do tabuleiro"""
+# 	# Tentar obter referência ao board para informações de debug
+# 	var board = null
+# 	if NetworkManager.is_online_mode:
+# 		# No multiplayer, tentar encontrar o board
+# 		board = get_tree().current_scene if get_tree().current_scene.has_method("get_board_left_value") else null
+# 	else:
+# 		# No offline, usar a referência do GameManager
+# 		if game_manager.has_method("board") and game_manager.board:
+# 			board = game_manager.board
 	
-	if board and board.has_method("get_board_is_empty"):
-		var is_empty = board.get_board_is_empty()
-		if is_empty:
-			print("DEBUG: Tabuleiro está vazio - qualquer peça deveria ser válida")
-		else:
-			var left_value = board.get_board_left_value()
-			var right_value = board.get_board_right_value()
-			print("DEBUG: Cabeças jogáveis no tabuleiro - Esquerda: %d, Direita: %d" % [left_value, right_value])
-			print("DEBUG: Para jogar, a peça precisa ter %d ou %d em algum dos lados" % [left_value, right_value])
-	else:
-		print("DEBUG: Não foi possível obter informações do tabuleiro")
+# 	if board and board.has_method("get_board_is_empty"):
+# 		var is_empty = board.get_board_is_empty()
+# 		if is_empty:
+# 			print("DEBUG: Tabuleiro está vazio - qualquer peça deveria ser válida")
+# 		else:
+# 			var left_value = board.get_board_left_value()
+# 			var right_value = board.get_board_right_value()
+# 			print("DEBUG: Cabeças jogáveis no tabuleiro - Esquerda: %d, Direita: %d" % [left_value, right_value])
+# 			print("DEBUG: Para jogar, a peça precisa ter %d ou %d em algum dos lados" % [left_value, right_value])
+# 	else:
+# 		print("DEBUG: Não foi possível obter informações do tabuleiro")
 
 func set_selection_visual(button: Control):
 	"""Define indicação visual para peça selecionada"""

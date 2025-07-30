@@ -89,7 +89,7 @@ func _on_turn_changed(player_id: int):
 
 func _on_game_over(winner_id: int, reason: String):
 	"""Mostra tela de game over - compatível com ambos os modos"""
-	print("DEBUG GAME_UI: Game over recebido - Winner ID: %d, Reason: %s" % [winner_id, reason])
+	# print("DEBUG GAME_UI: Game over recebido - Winner ID: %d, Reason: %s" % [winner_id, reason])
 	
 	if winner_id == -1:
 		winner_label.text = "Empate!"
@@ -100,9 +100,9 @@ func _on_game_over(winner_id: int, reason: String):
 		if NetworkManager.is_online_mode:
 			if winner_id in NetworkManager.players:
 				winner_name = NetworkManager.players[winner_id]
-				print("DEBUG GAME_UI: Nome do vencedor encontrado no NetworkManager: %s" % winner_name)
-			else:
-				print("DEBUG GAME_UI: Winner ID %d não encontrado no NetworkManager.players: %s" % [winner_id, NetworkManager.players])
+				# print("DEBUG GAME_UI: Nome do vencedor encontrado no NetworkManager: %s" % winner_name)
+			# else:
+				# print("DEBUG GAME_UI: Winner ID %d não encontrado no NetworkManager.players: %s" % [winner_id, NetworkManager.players])
 		else:
 			# No modo offline, usar informações do GameManager
 			if game_manager and "players" in game_manager and winner_id in game_manager.players:
@@ -121,7 +121,7 @@ func _on_game_over(winner_id: int, reason: String):
 	game_over_panel.visible = true
 	pass_button.visible = false
 	
-	print("DEBUG GAME_UI: Game over configurado - Winner: '%s', Reason: '%s'" % [winner_label.text, reason_label.text])
+	# print("DEBUG GAME_UI: Game over configurado - Winner: '%s', Reason: '%s'" % [winner_label.text, reason_label.text])
 	
 	# Quando game over está visível, interceptar inputs para modal
 	if has_node("MainContainer"):

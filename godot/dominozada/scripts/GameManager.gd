@@ -247,7 +247,7 @@ func get_valid_sides_for_piece(piece_data: Dictionary) -> Array[String]:
 	var board_left_value = board.get_board_left_value()
 	var board_right_value = board.get_board_right_value()
 	
-	print("DEBUG: get_valid_sides_for_piece [%d,%d] - Board: esquerda=%d, direita=%d" % [piece_data.a, piece_data.b, board_left_value, board_right_value])
+	# print("DEBUG: get_valid_sides_for_piece [%d,%d] - Board: esquerda=%d, direita=%d" % [piece_data.a, piece_data.b, board_left_value, board_right_value])
 	
 	# Verificar se pode conectar na esquerda
 	if piece_data.a == board_left_value or piece_data.b == board_left_value:
@@ -261,7 +261,7 @@ func get_valid_sides_for_piece(piece_data: Dictionary) -> Array[String]:
 	if piece_data.a == board_right_value or piece_data.b == board_right_value:
 		valid_sides.append("right")
 		
-	print("DEBUG: Lados válidos encontrados: %s" % str(valid_sides))
+	# print("DEBUG: Lados válidos encontrados: %s" % str(valid_sides))
 	return valid_sides
 
 func pass_turn():
@@ -277,13 +277,13 @@ func pass_turn_advanced(player_id: int):
 	
 	consecutive_passes += 1
 	passes_in_a_row += 1
-	var player_name = players[player_id].name if player_id in players else "Jogador " + str(player_id)
-	print("DEBUG OFFLINE: %s passou a vez (%d/%d passadas)" % [player_name, consecutive_passes, players_count])
+	# var player_name = players[player_id].name if player_id in players else "Jogador " + str(player_id)
+	# print("DEBUG OFFLINE: %s passou a vez (%d/%d passadas)" % [player_name, consecutive_passes, players_count])
 	player_passed.emit(player_id)
 	
 	# Verificar se todos passaram
 	if consecutive_passes >= players_count:
-		print("DEBUG OFFLINE: Todos passaram - calculando vencedor por pontos")
+		# print("DEBUG OFFLINE: Todos passaram - calculando vencedor por pontos")
 		end_game_by_points()
 		return
 	
@@ -308,7 +308,7 @@ func end_game(winner_id: int, reason: GameOverReason):
 		_:
 			reason_text = get_game_over_reason_text(reason)
 	
-	print("DEBUG OFFLINE: Game over - Winner: %s, Reason: %s" % [winner_name, reason_text])
+	# print("DEBUG OFFLINE: Game over - Winner: %s, Reason: %s" % [winner_name, reason_text])
 	game_over.emit(winner_id, reason_text)
 
 func end_game_by_points():
@@ -316,11 +316,11 @@ func end_game_by_points():
 	var lowest_points = 999
 	var winner_id = turn_order[0]
 	
-	print("DEBUG OFFLINE: Calculando vencedor por pontos...")
+	# print("DEBUG OFFLINE: Calculando vencedor por pontos...")
 	
 	for player_id in turn_order:
 		var points = calculate_hand_points(player_id)
-		print("DEBUG OFFLINE: %s tem %d pontos" % [players[player_id].name, points])
+		# print("DEBUG OFFLINE: %s tem %d pontos" % [players[player_id].name, points])
 		
 		if points < lowest_points:
 			lowest_points = points
@@ -328,7 +328,7 @@ func end_game_by_points():
 	
 	var winner_name = players[winner_id].name
 	var reason = "Jogo travado! %s venceu por menor pontuação (%d pontos)" % [winner_name, lowest_points]
-	print("DEBUG OFFLINE: Vencedor: %s" % winner_name)
+	# print("DEBUG OFFLINE: Vencedor: %s" % winner_name)
 	
 	current_state = GameState.GAME_OVER
 	game_over.emit(winner_id, reason)

@@ -73,52 +73,116 @@ func server_player_is_ready():
 		_start_actual_game()
 
 func _start_actual_game():
+	# print("DEBUG MULTIPLAYER: Iniciando jogo...")
+	
 	# Garantir que temos o board antes de iniciar o jogo
 	if not board or not is_instance_valid(board):
 		_find_board()
 	
+	# Configurar ordem dos turnos
 	turn_order = multiplayer.get_peers()
 	turn_order.push_front(1)
 	turn_order.shuffle()
+	
+	# print("DEBUG MULTIPLAYER: turn_order configurado: %s" % turn_order)
+	# print("DEBUG MULTIPLAYER: Jogadores no NetworkManager: %s" % NetworkManager.players)
+	
+	# Gerar e embaralhar dominós
 	domino_set.generate_full_set()
 	domino_set.shuffle()
+	
+	# Distribuir peças para cada jogador
 	for peer_id in turn_order:
 		players[peer_id] = {"hand": []}
-		for i in range(7): players[peer_id].hand.append(domino_set.draw_piece())
+		for i in range(7): 
+			var piece = domino_set.draw_piece()
+			if piece:
+				players[peer_id].hand.append(piece)
 		rpc_id(peer_id, "client_receive_hand", players[peer_id].hand)
+		# print("DEBUG MULTIPLAYER: Distribuídas %d peças para jogador %d (%s)" % [players[peer_id].hand.size(), peer_id, NetworkManager.get_player_name(peer_id)])
+	
+	# Atualizar contadores de peças
 	for peer_id in turn_order:
 		rpc("client_update_player_hand_count", peer_id, 7)
-	# O estado do board será gerenciado pelo próprio board.gd
+	
+	# Inicializar estado do jogo
 	passes_in_a_row = 0
 	current_turn_index = 0
+	
+	# print("DEBUG MULTIPLAYER: Estado inicial - current_turn_index: %d, primeiro jogador: %d (%s)" % [current_turn_index, turn_order[current_turn_index], NetworkManager.get_player_name(turn_order[current_turn_index])])
+	
+	# Iniciar jogo e definir primeiro turno
 	rpc("client_start_game")
 	_set_turn(turn_order[current_turn_index])
 
 @rpc("any_peer", "call_local", "reliable")
 func server_play_piece(piece_data: Dictionary, side: String):
+	# Verificar se o servidor está ativo
+	if not multiplayer.is_server():
+		# print("DEBUG MULTIPLAYER: server_play_piece chamado em cliente - ignorando")
+		return
+	
 	var sender_id = multiplayer.get_remote_sender_id()
 	if sender_id == 0: sender_id = 1
-	if turn_order.is_empty() or current_turn_index < 0 or current_turn_index >= turn_order.size():
-		push_error("turn_order está vazio ou current_turn_index fora do range!")
+	
+	# Debug detalhado do estado do jogo
+	# print("DEBUG MULTIPLAYER: server_play_piece - Sender: %d, Peça: [%d,%d], Lado: %s" % [sender_id, piece_data.a, piece_data.b, side])
+	
+	# Se houver problemas, mostrar estado completo
+	# if turn_order.is_empty() or current_turn_index < 0 or current_turn_index >= turn_order.size():
+	# 	debug_game_state()
+	
+	# Verificações robustas
+	if turn_order.is_empty():
+		push_error("ERRO MULTIPLAYER: turn_order está vazio! Jogo não foi inicializado corretamente.")
+		# print("DEBUG MULTIPLAYER: Estado dos jogadores: %s" % players)
+		# print("DEBUG MULTIPLAYER: Jogadores prontos: %s" % ready_players)
 		return
-	if sender_id != turn_order[current_turn_index]: return
+		
+	if current_turn_index < 0 or current_turn_index >= turn_order.size():
+		push_error("ERRO MULTIPLAYER: current_turn_index (%d) fora do range! turn_order.size(): %d" % [current_turn_index, turn_order.size()])
+		# print("DEBUG MULTIPLAYER: turn_order: %s" % turn_order)
+		return
+	
+	# Verificar se é o turno do jogador
+	var expected_player = turn_order[current_turn_index]
+	if sender_id != expected_player:
+		# print("DEBUG MULTIPLAYER: Não é o turno do jogador %d (esperado: %d)" % [sender_id, expected_player])
+		return
 
 	var valid_sides = get_valid_sides_for_piece(piece_data)
-	if not side in valid_sides: return
+	if not side in valid_sides: 
+		# print("DEBUG MULTIPLAYER: Lado inválido '%s' para peça [%d,%d]. Lados válidos: %s" % [side, piece_data.a, piece_data.b, valid_sides])
+		return
 
+	# Verificar se o jogador tem a peça
+	if not sender_id in players:
+		push_error("ERRO MULTIPLAYER: Jogador %d não encontrado em players!" % sender_id)
+		return
+		
 	var player_hand = players[sender_id].hand
+	var piece_found = false
+	
 	for i in range(player_hand.size()):
 		if player_hand[i].a == piece_data.a and player_hand[i].b == piece_data.b:
 			player_hand.remove_at(i)
+			piece_found = true
 			break
-	# O board é responsável por atualizar seu próprio estado via sinal
-	# rpc("_update_board_state",piece_data, side) - REMOVIDO
+	
+	if not piece_found:
+		# print("DEBUG MULTIPLAYER: Jogador %d não tem a peça [%d,%d]" % [sender_id, piece_data.a, piece_data.b])
+		return
+	
+	# Executar jogada
+	# print("DEBUG MULTIPLAYER: Jogada válida executada por %s" % NetworkManager.get_player_name(sender_id))
 	rpc("client_play_piece", piece_data, side, sender_id)
 	rpc("client_update_player_hand_count", sender_id, player_hand.size())
 	passes_in_a_row = 0
+	
 	if player_hand.is_empty():
 		var winner_name = NetworkManager.get_player_name(sender_id)
 		var reason = "%s venceu! Ficou sem peças." % winner_name
+		# print("DEBUG MULTIPLAYER: Jogo terminado - %s" % reason)
 		rpc("client_game_over", sender_id, reason)
 	else:
 		_next_turn()
@@ -142,7 +206,7 @@ func get_valid_sides_for_piece(piece_data: Dictionary) -> Array[String]:
 	var board_left_value = board.get_board_left_value()
 	var board_right_value = board.get_board_right_value()
 	
-	print("DEBUG MULTIPLAYER: get_valid_sides_for_piece [%d,%d] - Board: esquerda=%d, direita=%d" % [piece_data.a, piece_data.b, board_left_value, board_right_value])
+	# print("DEBUG MULTIPLAYER: get_valid_sides_for_piece [%d,%d] - Board: esquerda=%d, direita=%d" % [piece_data.a, piece_data.b, board_left_value, board_right_value])
 	
 	if piece_data.a == board_left_value or piece_data.b == board_left_value:
 		valid_sides.append("left")
@@ -151,23 +215,49 @@ func get_valid_sides_for_piece(piece_data: Dictionary) -> Array[String]:
 	if piece_data.a == board_right_value or piece_data.b == board_right_value:
 		valid_sides.append("right")
 	
-	print("DEBUG MULTIPLAYER: Lados válidos encontrados: %s" % str(valid_sides))
+	# print("DEBUG MULTIPLAYER: Lados válidos encontrados: %s" % str(valid_sides))
 	return valid_sides
 
 # REMOVIDO: _update_board_state() - agora o board gerencia seu próprio estado
 
 @rpc("any_peer", "call_local", "reliable")
 func server_pass_turn():
+	# Verificar se o servidor está ativo
+	if not multiplayer.is_server():
+		# print("DEBUG MULTIPLAYER: server_pass_turn chamado em cliente - ignorando")
+		return
+	
 	var sender_id = multiplayer.get_remote_sender_id()
 	if sender_id == 0: sender_id = 1
-	if turn_order.is_empty() or current_turn_index < 0 or current_turn_index >= turn_order.size():
-		push_error("turn_order está vazio ou current_turn_index fora do range!")
+	
+	# Debug detalhado do estado do jogo
+	# print("DEBUG MULTIPLAYER: server_pass_turn - Sender: %d, turn_order: %s, current_turn_index: %d" % [sender_id, turn_order, current_turn_index])
+	
+	# Verificações robustas
+	if turn_order.is_empty():
+		push_error("ERRO MULTIPLAYER: turn_order está vazio! Jogo não foi inicializado corretamente.")
 		return
-	if sender_id != turn_order[current_turn_index]: return
+		
+	if current_turn_index < 0 or current_turn_index >= turn_order.size():
+		push_error("ERRO MULTIPLAYER: current_turn_index (%d) fora do range! turn_order.size(): %d" % [current_turn_index, turn_order.size()])
+		return
+	
+	# Verificar se é o turno do jogador
+	var expected_player = turn_order[current_turn_index]
+	if sender_id != expected_player:
+		print("DEBUG MULTIPLAYER: Não é o turno do jogador %d (esperado: %d)" % [sender_id, expected_player])
+		return
+	
 	passes_in_a_row += 1
+
+	# var player_name = NetworkManager.get_player_name(sender_id)
+	# print("DEBUG MULTIPLAYER: %s passou a vez (%d/%d passadas)" % [player_name, passes_in_a_row, turn_order.size()])
+	
 	rpc("client_player_passed", sender_id)
+	
 	if passes_in_a_row >= turn_order.size():
 		# Todos passaram - calcular vencedor por pontos
+		# print("DEBUG MULTIPLAYER: Todos passaram - calculando vencedor por pontos")
 		var winner_data = calculate_winner_by_points()
 		var winner_name = NetworkManager.get_player_name(winner_data.winner_id)
 		var reason = "Jogo travado! %s venceu por menor pontuação (%d pontos)" % [winner_name, winner_data.points]
@@ -176,15 +266,25 @@ func server_pass_turn():
 		_next_turn()
 
 func _next_turn():
+	if turn_order.is_empty():
+		push_error("ERRO MULTIPLAYER: _next_turn chamado com turn_order vazio!")
+		return
+	
 	current_turn_index = (current_turn_index + 1) % turn_order.size()
-	_set_turn(turn_order[current_turn_index])
+	var next_player = turn_order[current_turn_index]
+
+	# var player_name = NetworkManager.get_player_name(next_player)
+	# print("DEBUG MULTIPLAYER: Próximo turno - Index: %d, Jogador: %d (%s)" % [current_turn_index, next_player, player_name])
+	
+	_set_turn(next_player)
+
 
 func calculate_winner_by_points() -> Dictionary:
 	"""Calcula o vencedor quando todos passam - menor pontuação vence"""
 	var lowest_points = 999
 	var winner_id = turn_order[0]
 	
-	print("DEBUG MULTIPLAYER: Calculando vencedor por pontos...")
+	# print("DEBUG MULTIPLAYER: Calculando vencedor por pontos...")
 	
 	for player_id in turn_order:
 		var hand = players[player_id].hand
@@ -194,18 +294,34 @@ func calculate_winner_by_points() -> Dictionary:
 		for piece in hand:
 			points += piece.a + piece.b
 		
-		print("DEBUG MULTIPLAYER: Jogador %s (%s) tem %d pontos" % [player_id, NetworkManager.get_player_name(player_id), points])
+		# print("DEBUG MULTIPLAYER: Jogador %s (%s) tem %d pontos" % [player_id, NetworkManager.get_player_name(player_id), points])
 		
 		if points < lowest_points:
 			lowest_points = points
 			winner_id = player_id
 	
-	print("DEBUG MULTIPLAYER: Vencedor: %s com %d pontos" % [NetworkManager.get_player_name(winner_id), lowest_points])
+	# print("DEBUG MULTIPLAYER: Vencedor: %s com %d pontos" % [NetworkManager.get_player_name(winner_id), lowest_points])
 	
 	return {
 		"winner_id": winner_id,
 		"points": lowest_points
 	}
+
+# func debug_game_state():
+# 	"""Função para debug do estado do jogo"""
+# 	print("=== DEBUG MULTIPLAYER - Estado do Jogo ===")
+# 	print("turn_order: %s" % turn_order)
+# 	print("current_turn_index: %d" % current_turn_index)
+# 	print("passes_in_a_row: %d" % passes_in_a_row)
+# 	print("players: %s" % players.keys())
+# 	print("ready_players: %s" % ready_players)
+# 	print("NetworkManager.players: %s" % NetworkManager.players)
+# 	if not turn_order.is_empty() and current_turn_index >= 0 and current_turn_index < turn_order.size():
+# 		var current_player = turn_order[current_turn_index]
+# 		print("Turno atual: %d (%s)" % [current_player, NetworkManager.get_player_name(current_player)])
+# 	else:
+# 		print("ERRO: Estado de turno inválido!")
+# 	print("=========================================")
 
 func _set_turn(player_id: int):
 	rpc("client_set_turn", player_id)

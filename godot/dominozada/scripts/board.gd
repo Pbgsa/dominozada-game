@@ -38,7 +38,7 @@ func add_piece_to_board(data: Dictionary, requested_side: String = ""):
 	var piece_a = data.a
 	var piece_b = data.b
 	
-	print("DEBUG: Adicionando peça [%d,%d] ao tabuleiro no lado: %s" % [piece_a, piece_b, requested_side])
+	# print("DEBUG: Adicionando peça [%d,%d] ao tabuleiro no lado: %s" % [piece_a, piece_b, requested_side])
 	
 	# Check if it's the first piece
 	if pieces_sequence.is_empty():
@@ -68,13 +68,13 @@ func add_piece_to_board(data: Dictionary, requested_side: String = ""):
 				board_left_value = piece_b
 				placed = true
 				actual_side = "left"
-				print("DEBUG: Peça conectada na ESQUERDA (piece_a=%d == left_value). Nova esquerda: %d" % [piece_a, board_left_value])
+				# print("DEBUG: Peça conectada na ESQUERDA (piece_a=%d == left_value). Nova esquerda: %d" % [piece_a, board_left_value])
 			elif piece_b == board_left_value:
 				pieces_sequence.push_front({"a": piece_a, "b": piece_b})
 				board_left_value = piece_a
 				placed = true
 				actual_side = "left"
-				print("DEBUG: Peça conectada na ESQUERDA (piece_b=%d == left_value). Nova esquerda: %d" % [piece_b, board_left_value])
+				# print("DEBUG: Peça conectada na ESQUERDA (piece_b=%d == left_value). Nova esquerda: %d" % [piece_b, board_left_value])
 		
 		if not placed and (requested_side == "right" or requested_side.is_empty()):
 			# Try to connect on the right end
@@ -83,19 +83,19 @@ func add_piece_to_board(data: Dictionary, requested_side: String = ""):
 				board_right_value = piece_b
 				placed = true
 				actual_side = "right"
-				print("DEBUG: Peça conectada na DIREITA (piece_a=%d == right_value). Nova direita: %d" % [piece_a, board_right_value])
+				# print("DEBUG: Peça conectada na DIREITA (piece_a=%d == right_value). Nova direita: %d" % [piece_a, board_right_value])
 			elif piece_b == board_right_value:
 				pieces_sequence.append({"a": piece_b, "b": piece_a})
 				board_right_value = piece_a
 				placed = true
 				actual_side = "right"
-				print("DEBUG: Peça conectada na DIREITA (piece_b=%d == right_value). Nova direita: %d" % [piece_b, board_right_value])
+				# print("DEBUG: Peça conectada na DIREITA (piece_b=%d == right_value). Nova direita: %d" % [piece_b, board_right_value])
 		
 		if not placed:
-			print("ERRO: Peça [%d,%d] não pôde ser conectada no lado '%s'! Esquerda: %d, Direita: %d" % [piece_a, piece_b, requested_side, board_left_value, board_right_value])
+			# print("ERRO: Peça [%d,%d] não pôde ser conectada no lado '%s'! Esquerda: %d, Direita: %d" % [piece_a, piece_b, requested_side, board_left_value, board_right_value])
 			return
 			
-		print("DEBUG: Estado final - Esquerda: %d, Direita: %d, Lado usado: %s" % [board_left_value, board_right_value, actual_side])
+		# print("DEBUG: Estado final - Esquerda: %d, Direita: %d, Lado usado: %s" % [board_left_value, board_right_value, actual_side])
 		
 		create_visual_piece_at_side(actual_side)
 		update_head_positions()
