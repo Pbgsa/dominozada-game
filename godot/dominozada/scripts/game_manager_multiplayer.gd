@@ -23,22 +23,34 @@ func _ready():
 	# Aguardar um frame para garantir que a cena esteja carregada
 	await get_tree().process_frame
 	
-	# Obter referência ao board
+	# Encontrar o board na árvore da cena
+	_find_board()
+
+func _find_board():
+	# Tentar encontrar o board na cena atual
 	board = get_tree().current_scene if get_tree().current_scene.has_method("get_board_left_value") else null
 	
 	if not board:
-		# Tentar encontrar o board na cena atual
-		var scene_root = get_tree().current_scene
-		for child in scene_root.get_children():
-			if child.has_method("get_board_left_value"):
-				board = child
-				print("Board encontrado no multiplayer:", child.name)
-				break
+		# Procurar recursivamente na árvore da cena
+		board = _search_for_board(get_tree().current_scene)
 	
 	if board:
 		print("Board encontrado com sucesso no multiplayer!")
 	else:
 		print("AVISO: Board não encontrado no multiplayer - algumas funcionalidades podem não funcionar")
+
+func _search_for_board(node: Node) -> Node:
+	# Verificar se o nó atual é o board
+	if node.has_method("get_board_left_value"):
+		return node
+	
+	# Procurar nos filhos
+	for child in node.get_children():
+		var result = _search_for_board(child)
+		if result:
+			return result
+	
+	return null
 
 func host_requests_start_game():
 	if not multiplayer.is_server(): return
@@ -61,6 +73,10 @@ func server_player_is_ready():
 		_start_actual_game()
 
 func _start_actual_game():
+	# Garantir que temos o board antes de iniciar o jogo
+	if not board or not is_instance_valid(board):
+		_find_board()
+	
 	turn_order = multiplayer.get_peers()
 	turn_order.push_front(1)
 	turn_order.shuffle()
@@ -108,10 +124,14 @@ func server_play_piece(piece_data: Dictionary, side: String):
 func get_valid_sides_for_piece(piece_data: Dictionary) -> Array[String]:
 	var valid_sides: Array[String] = []
 	
+	# Garantir que temos uma referência válida ao board
+	if not board or not is_instance_valid(board):
+		_find_board()
+	
 	# Usar o board como fonte da verdade
 	if not board:
-		print("AVISO: Board não encontrado no multiplayer - retornando lado esquerdo como padrão")
-		return ["left"]
+		print("ERRO: Board não encontrado no multiplayer - não é possível validar jogadas")
+		return []
 	
 	var board_is_empty = board.get_board_is_empty()
 	if board_is_empty: 
