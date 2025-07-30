@@ -399,3 +399,19 @@ func get_right_value() -> int:
 func is_empty() -> bool:
 	"""Verifica se o tabuleiro está vazio"""
 	return pieces_sequence.is_empty()
+
+func add_a_purchased_piece_to_hand(player_id: int, piece: Dictionary):
+	#players = game_manager.players if game_manager else []
+	for player in game_manager.players:
+		if player.player_id == player_id:
+			player_hand.add_piece(piece.a, piece.b)
+			game_manager.player_hand_changed.emit(player_id, player.get_hand_count())
+
+
+func add_a_purchased_piece_to_bot(player_id: int, piece: Dictionary):
+	# players = game_manager.players if game_manager else []
+	for player in game_manager.players:
+		if player.player_id == player_id:
+			player.add_piece_to_hand(piece)
+			game_manager.player_hand_changed.emit(player_id, player.get_hand_count())
+			return

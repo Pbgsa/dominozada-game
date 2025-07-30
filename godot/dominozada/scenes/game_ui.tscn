@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://1nodedq6gwob"]
 
-[ext_resource type="Script" uid="uid://ck8eqdastpon5" path="res://scripts/game_ui.gd" id="1_x8k2d"]
+[ext_resource type="Script" path="res://scripts/game_ui.gd" id="1_x8k2d"]
 
 [node name="GameUI" type="CanvasLayer"]
 script = ExtResource("1_x8k2d")
@@ -51,6 +51,10 @@ text = "Passar Vez"
 [node name="StartButton" type="Button" parent="MainContainer/ActionButtons"]
 layout_mode = 2
 text = "Iniciar Jogo"
+
+[node name="BuyButton" type="Button" parent="MainContainer/ActionButtons"]
+layout_mode = 2
+text = "Comprar Peça"
 
 [node name="GameOverPanel" type="Panel" parent="MainContainer"]
 visible = false
