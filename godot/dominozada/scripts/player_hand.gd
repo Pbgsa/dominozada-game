@@ -37,7 +37,8 @@ func _on_piece_selected(button: Button):
 	var valid_sides = game_manager.get_valid_sides_for_piece(piece_data)
 	
 	if valid_sides.is_empty():
-		print("Essa peça não pode ser jogada.")
+		# Debug: Mostrar informações das cabeças jogáveis
+		print("Essa peça [%d,%d] não pode ser jogada." % [piece_data.a, piece_data.b])
 		return
 	elif valid_sides.size() == 1:
 		_on_placement_side_selected(valid_sides[0], piece_data)

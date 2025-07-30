@@ -14,14 +14,31 @@ var domino_set = DominoSet.new()
 var players := {}
 var turn_order := []
 var current_turn_index := 0
-var board_left_value := -1
-var board_right_value := -1
-var board_is_empty := true
+# REMOVIDO: board_left_value, board_right_value, board_is_empty - usa o board como fonte da verdade
 var passes_in_a_row := 0
 var ready_players := []
+var board: Node  # Referência ao board
 
 func _ready():
-	pass # IDs serão definidos na conexão
+	# Aguardar um frame para garantir que a cena esteja carregada
+	await get_tree().process_frame
+	
+	# Obter referência ao board
+	board = get_tree().current_scene if get_tree().current_scene.has_method("get_board_left_value") else null
+	
+	if not board:
+		# Tentar encontrar o board na cena atual
+		var scene_root = get_tree().current_scene
+		for child in scene_root.get_children():
+			if child.has_method("get_board_left_value"):
+				board = child
+				print("Board encontrado no multiplayer:", child.name)
+				break
+	
+	if board:
+		print("Board encontrado com sucesso no multiplayer!")
+	else:
+		print("AVISO: Board não encontrado no multiplayer - algumas funcionalidades podem não funcionar")
 
 func host_requests_start_game():
 	if not multiplayer.is_server(): return
@@ -55,7 +72,7 @@ func _start_actual_game():
 		rpc_id(peer_id, "client_receive_hand", players[peer_id].hand)
 	for peer_id in turn_order:
 		rpc("client_update_player_hand_count", peer_id, 7)
-	board_is_empty = true
+	# O estado do board será gerenciado pelo próprio board.gd
 	passes_in_a_row = 0
 	current_turn_index = 0
 	rpc("client_start_game")
@@ -78,7 +95,8 @@ func server_play_piece(piece_data: Dictionary, side: String):
 		if player_hand[i].a == piece_data.a and player_hand[i].b == piece_data.b:
 			player_hand.remove_at(i)
 			break
-	rpc("_update_board_state",piece_data, side)
+	# O board é responsável por atualizar seu próprio estado via sinal
+	# rpc("_update_board_state",piece_data, side) - REMOVIDO
 	rpc("client_play_piece", piece_data, side, sender_id)
 	rpc("client_update_player_hand_count", sender_id, player_hand.size())
 	passes_in_a_row = 0
@@ -89,25 +107,32 @@ func server_play_piece(piece_data: Dictionary, side: String):
 
 func get_valid_sides_for_piece(piece_data: Dictionary) -> Array[String]:
 	var valid_sides: Array[String] = []
-	if board_is_empty: return ["left"]
+	
+	# Usar o board como fonte da verdade
+	if not board:
+		print("AVISO: Board não encontrado no multiplayer - retornando lado esquerdo como padrão")
+		return ["left"]
+	
+	var board_is_empty = board.get_board_is_empty()
+	if board_is_empty: 
+		return ["left"]
+	
+	var board_left_value = board.get_board_left_value()
+	var board_right_value = board.get_board_right_value()
+	
+	print("DEBUG MULTIPLAYER: get_valid_sides_for_piece [%d,%d] - Board: esquerda=%d, direita=%d" % [piece_data.a, piece_data.b, board_left_value, board_right_value])
+	
 	if piece_data.a == board_left_value or piece_data.b == board_left_value:
 		valid_sides.append("left")
-	if board_left_value == board_right_value and piece_data.a == piece_data.b: return valid_sides
+	if board_left_value == board_right_value and piece_data.a == piece_data.b: 
+		return valid_sides
 	if piece_data.a == board_right_value or piece_data.b == board_right_value:
 		valid_sides.append("right")
+	
+	print("DEBUG MULTIPLAYER: Lados válidos encontrados: %s" % str(valid_sides))
 	return valid_sides
 
-@rpc("authority","call_local","reliable")
-func _update_board_state(piece_data: Dictionary, side: String):
-	var connecting_value = board_left_value if side == "left" else board_right_value
-	if board_is_empty:
-		board_left_value = piece_data.a
-		board_right_value = piece_data.b
-		board_is_empty = false
-	else:
-		var new_head = piece_data.b if piece_data.a == connecting_value else piece_data.a
-		if side == "left": board_left_value = new_head
-		else: board_right_value = new_head
+# REMOVIDO: _update_board_state() - agora o board gerencia seu próprio estado
 
 @rpc("any_peer", "call_local", "reliable")
 func server_pass_turn():
