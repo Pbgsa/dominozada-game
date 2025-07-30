@@ -36,7 +36,7 @@ func set_piece_count(count: int, direction: String):
 		
 		# Verificar se o botão ainda existe antes de configurar
 		if is_instance_valid(button) and button.has_method("set_piece_values"):
-			button.set_piece_values(0, 0, direction)
+			button.set_piece_values(-1, -1, direction)
 	
 	is_updating = false
 

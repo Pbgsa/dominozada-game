@@ -32,6 +32,8 @@ func update_sprite():
 
 func get_piece_index(a: int, b: int) -> int:
 	# Lógica do seu projeto original para garantir compatibilidade
+	if a < 0 or b < 0:
+		return 0
 	var min_val = min(a, b)
 	var max_val = max(a, b)
 	var count = 1
