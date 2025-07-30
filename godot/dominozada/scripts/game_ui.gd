@@ -3,11 +3,11 @@ extends CanvasLayer
 
 @onready var turn_label := $MainContainer/TurnInfo/TurnLabel
 @onready var pass_button := $MainContainer/ActionButtons/PassButton
-@onready var start_button := $MainContainer/ActionButtons/StartButton
+@onready var start_button := $MainContainer/ActionButtons/StartButton if has_node("MainContainer/ActionButtons/StartButton") else null
 @onready var game_over_panel := $MainContainer/GameOverPanel
 @onready var winner_label := $MainContainer/GameOverPanel/GameOverContent/WinnerLabel
 @onready var reason_label := $MainContainer/GameOverPanel/GameOverContent/ReasonLabel
-@onready var new_game_button := $MainContainer/GameOverPanel/GameOverContent/NewGameButton
+@onready var new_game_button := $MainContainer/GameOverPanel/GameOverContent/NewGameButton if has_node("MainContainer/GameOverPanel/GameOverContent/NewGameButton") else null
 
 var game_manager: Node
 
