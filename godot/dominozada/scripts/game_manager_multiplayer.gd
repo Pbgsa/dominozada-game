@@ -117,7 +117,9 @@ func server_play_piece(piece_data: Dictionary, side: String):
 	rpc("client_update_player_hand_count", sender_id, player_hand.size())
 	passes_in_a_row = 0
 	if player_hand.is_empty():
-		rpc("client_game_over", sender_id, "O jogador não tem mais peças!")
+		var winner_name = NetworkManager.get_player_name(sender_id)
+		var reason = "%s venceu! Ficou sem peças." % winner_name
+		rpc("client_game_over", sender_id, reason)
 	else:
 		_next_turn()
 
@@ -165,13 +167,46 @@ func server_pass_turn():
 	passes_in_a_row += 1
 	rpc("client_player_passed", sender_id)
 	if passes_in_a_row >= turn_order.size():
-		rpc("client_game_over", -1, "Jogo travado!")
+		# Todos passaram - calcular vencedor por pontos
+		var winner_data = calculate_winner_by_points()
+		var winner_name = NetworkManager.get_player_name(winner_data.winner_id)
+		var reason = "Jogo travado! %s venceu por menor pontuação (%d pontos)" % [winner_name, winner_data.points]
+		rpc("client_game_over", winner_data.winner_id, reason)
 	else:
 		_next_turn()
 
 func _next_turn():
 	current_turn_index = (current_turn_index + 1) % turn_order.size()
 	_set_turn(turn_order[current_turn_index])
+
+func calculate_winner_by_points() -> Dictionary:
+	"""Calcula o vencedor quando todos passam - menor pontuação vence"""
+	var lowest_points = 999
+	var winner_id = turn_order[0]
+	
+	print("DEBUG MULTIPLAYER: Calculando vencedor por pontos...")
+	
+	for player_id in turn_order:
+		var hand = players[player_id].hand
+		var points = 0
+		
+		# Calcular pontos na mão do jogador
+		for piece in hand:
+			points += piece.a + piece.b
+		
+		print("DEBUG MULTIPLAYER: Jogador %s (%s) tem %d pontos" % [player_id, NetworkManager.get_player_name(player_id), points])
+		
+		if points < lowest_points:
+			lowest_points = points
+			winner_id = player_id
+	
+	print("DEBUG MULTIPLAYER: Vencedor: %s com %d pontos" % [NetworkManager.get_player_name(winner_id), lowest_points])
+	
+	return {
+		"winner_id": winner_id,
+		"points": lowest_points
+	}
+
 func _set_turn(player_id: int):
 	rpc("client_set_turn", player_id)
 @rpc("authority", "call_local", "reliable")

@@ -89,8 +89,10 @@ func _on_turn_changed(player_id: int):
 
 func _on_game_over(winner_id: int, reason: String):
 	"""Mostra tela de game over - compatível com ambos os modos"""
+	print("DEBUG GAME_UI: Game over recebido - Winner ID: %d, Reason: %s" % [winner_id, reason])
+	
 	if winner_id == -1:
-		winner_label.text = "Jogo Travado!"
+		winner_label.text = "Empate!"
 	else:
 		var winner_name = "Jogador " + str(winner_id)
 		
@@ -98,18 +100,28 @@ func _on_game_over(winner_id: int, reason: String):
 		if NetworkManager.is_online_mode:
 			if winner_id in NetworkManager.players:
 				winner_name = NetworkManager.players[winner_id]
+				print("DEBUG GAME_UI: Nome do vencedor encontrado no NetworkManager: %s" % winner_name)
+			else:
+				print("DEBUG GAME_UI: Winner ID %d não encontrado no NetworkManager.players: %s" % [winner_id, NetworkManager.players])
 		else:
+			# No modo offline, usar informações do GameManager
 			if game_manager and "players" in game_manager and winner_id in game_manager.players:
 				if typeof(game_manager.players[winner_id]) == TYPE_DICTIONARY:
 					winner_name = game_manager.players[winner_id].name
 				else:
 					winner_name = game_manager.players[winner_id].player_name if "player_name" in game_manager.players[winner_id] else winner_name
 		
-		winner_label.text = winner_name + " venceu!"
+		# Verificar se a razão já contém o nome do vencedor
+		if winner_name in reason:
+			winner_label.text = "Vencedor!"
+		else:
+			winner_label.text = winner_name + " venceu!"
 	
 	reason_label.text = reason
 	game_over_panel.visible = true
 	pass_button.visible = false
+	
+	print("DEBUG GAME_UI: Game over configurado - Winner: '%s', Reason: '%s'" % [winner_label.text, reason_label.text])
 	
 	# Quando game over está visível, interceptar inputs para modal
 	if has_node("MainContainer"):
