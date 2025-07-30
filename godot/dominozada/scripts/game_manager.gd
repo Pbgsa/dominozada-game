@@ -169,8 +169,13 @@ func play_piece(player_id: int, piece: Dictionary, side: String) -> bool:
 		player_hand_changed.emit(player_id, player.get_hand_count())
 		
 		# Verificar vitória
+		# delay aqui embaixo pfv
 		if player.get_hand_count() == 0:
-			end_game(player_id, GameOverReason.EMPTY_HAND)
+			await get_tree().create_timer(3).timeout
+			if player.get_hand_count() == 0:
+				end_game(player_id, GameOverReason.EMPTY_HAND)
+				return true
+			next_turn()
 			return true
 		
 		# Próximo turno
@@ -195,7 +200,11 @@ func play_piece(player_id: int, piece: Dictionary, side: String) -> bool:
 		player_hand_changed.emit(player_id, player.get_hand_count())
 		
 		if player.get_hand_count() == 0:
-			end_game(player_id, GameOverReason.EMPTY_HAND)
+			await get_tree().create_timer(3).timeout
+			if player.get_hand_count() == 0:
+				end_game(player_id, GameOverReason.EMPTY_HAND)
+				return true
+			next_turn()
 			return true
 		
 		next_turn()
@@ -299,3 +308,18 @@ func update_all_hand_counts():
 	"""Emite sinais de atualização para todas as mãos dos jogadores"""
 	for i in range(players.size()):
 		player_hand_changed.emit(i, players[i].get_hand_count())
+
+func report_invalid_move():
+	"""Denuncia a última jogada inválida"""
+	if last_invalid_move.is_empty():
+		print("Nenhuma jogada inválida para denunciar.")
+		return
+	
+	var player_id = last_invalid_move["player_id"]
+	var piece = last_invalid_move["piece"]
+	var side = last_invalid_move["side"]
+	
+	print("Denunciando jogada inválida de %s: peça [%d,%d] no lado %s" % [players[player_id].player_name, piece.a, piece.b, side])
+	
+	board.remove_piece(last_invalid_move)
+	last_invalid_move.clear()  # Limpar após denúncia

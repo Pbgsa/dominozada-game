@@ -82,7 +82,9 @@ func _on_start_button_pressed():
 		game_manager.start_new_game()
 
 func _on_report_button_pressed():
-	print("Reportar jogo")
+	"""Denuncia jogada inválida"""
+	if game_manager:
+		game_manager.report_invalid_move()
 
 func _on_new_game_button_pressed():
 	"""Reinicia o jogo após game over"""

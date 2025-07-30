@@ -411,11 +411,7 @@ func remove_piece(last_invalid_move: Dictionary): # { player_id, piece, side, ro
 	var invalid_piece = last_invalid_move["piece"]
 	var invalid_piece_side = last_invalid_move["side"]
 
-	# Primeiro, retira a peça do tabuleiro
 	remove_piece_from_a_side(invalid_piece, invalid_piece_side, invalid_piece_player_id)
-
-
-	# Depois, devolve a peça ao jogador infrator
 
 func remove_piece_from_a_side(piece: Dictionary, side: String, player_id: int):
 	"""Remove a piece from the specified side"""
