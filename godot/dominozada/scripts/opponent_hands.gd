@@ -25,13 +25,43 @@ func _on_game_started():
 	var all_players = game_manager.turn_order.duplicate()
 	all_players.erase(my_id)
 	
-	if all_players.size() > 0: ui_map[all_players[0]] = top_hand
-	if all_players.size() > 1: ui_map[all_players[1]] = left_hand
-	if all_players.size() > 2: ui_map[all_players[2]] = right_hand
+	if all_players.size() > 0: 
+		ui_map[all_players[0]] = top_hand
+		_update_opponent_label(top_hand, all_players[0])
+	if all_players.size() > 1: 
+		ui_map[all_players[1]] = left_hand  
+		_update_opponent_label(left_hand, all_players[1])
+	if all_players.size() > 2: 
+		ui_map[all_players[2]] = right_hand
+		_update_opponent_label(right_hand, all_players[2])
 	
 	top_hand.set_piece_count(7, "up")
 	left_hand.set_piece_count(7, "left")
 	right_hand.set_piece_count(7, "right")
+
+func _update_opponent_label(hand_node: Node, player_id: int):
+	"""Atualiza o label do oponente com o nome do jogador"""
+	var player_name = "Jogador " + str(player_id)
+	
+	if NetworkManager.is_online_mode and player_id in NetworkManager.players:
+		player_name = NetworkManager.players[player_id]
+	elif not NetworkManager.is_online_mode and game_manager and "players" in game_manager:
+		if player_id in game_manager.players:
+			var player_data = game_manager.players[player_id]
+			if typeof(player_data) == TYPE_DICTIONARY and "name" in player_data:
+				player_name = player_data.name
+			elif player_data.has_method("get") and "player_name" in player_data:
+				player_name = player_data.player_name
+	
+	# Tentar encontrar um label filho do hand_node para mostrar o nome
+	if hand_node.has_method("set_player_name"):
+		hand_node.set_player_name(player_name)
+	elif hand_node.get_child_count() > 0:
+		# Procurar por um Label nos filhos
+		for child in hand_node.get_children():
+			if child is Label:
+				child.text = player_name
+				break
 
 
 func _on_player_hand_count_changed(player_id: int, new_count: int):

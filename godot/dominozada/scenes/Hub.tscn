@@ -34,6 +34,13 @@ offset_right = 239.0
 offset_bottom = 87.0
 placeholder_text = "IP do Servidor"
 
+[node name="PlayerNameInput" type="LineEdit" parent="."]
+offset_left = 670.0
+offset_top = 33.0
+offset_right = 897.0
+offset_bottom = 87.0
+placeholder_text = "Digite seu nome..."
+
 [node name="PlayerList" type="VBoxContainer" parent="."]
 offset_left = 84.0
 offset_top = 104.0
