@@ -43,6 +43,7 @@ func start_new_game():
 	turn_changed.emit(turn_order[current_turn_index])
 
 func play_piece(piece_data: Dictionary, side: String):
+	if(current_turn_index > 0): return
 	var valid_sides = get_valid_sides_for_piece(piece_data)
 	if not side in valid_sides: return
 	
@@ -115,6 +116,7 @@ func _execute_bot_turn(bot_id: int):
 			_update_board_state(piece, side_to_play)
 			piece_played_on_board.emit(piece, side_to_play, bot_id)
 			bot_hand.erase(piece)
+			print(bot_id)
 			player_hand_count_changed.emit(bot_id, bot_hand.size())
 			passes_in_a_row = 0
 			if bot_hand.is_empty():
