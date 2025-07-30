@@ -37,7 +37,7 @@ func decide_move(board: Node, last_invalid_move: Dictionary, is_gato_com_lebre: 
 
 func decide_easy_move(board: Node, playable_pieces: Array[Dictionary]) -> Dictionary:
 	# se chegou até aqui, significa que pode tentar gato com lebre
-	if playable_pieces.is_empty() and randf() < 1: # (100% pra debug) 25% chance de passar a vez
+	if playable_pieces.is_empty() and randf() < 0.25: # 25% chance de passar a vez
 		var pieces_in_hand = get_hand_pieces()
 		var side = "left" if randf() < 0.5 else "right"
 		if pieces_in_hand.is_empty():
@@ -54,6 +54,15 @@ func decide_easy_move(board: Node, playable_pieces: Array[Dictionary]) -> Dictio
 	return {"piece": piece, "side": side}
 
 func decide_medium_move(board: Node, playable_pieces: Array[Dictionary]) -> Dictionary:
+	# se chegou até aqui, significa que pode tentar gato com lebre
+	if playable_pieces.is_empty() and randf() < 0.5: # 50% chance de passar a vez
+		var pieces_in_hand = get_hand_pieces()
+		var side = "left" if randf() < 0.5 else "right"
+		if pieces_in_hand.is_empty():
+			return {}  # Sem peças na mão, não pode jogar
+		else:
+			return {"piece": pieces_in_hand[0], "side": side}
+
 	"""Estratégia média: prioriza peças com maior pontuação"""
 	var best_piece = playable_pieces[0]
 	var best_points = best_piece.a + best_piece.b
@@ -100,17 +109,17 @@ func try_to_report_invalid_move(board: Node, last_invalid_move: Dictionary) -> b
 
 	match difficulty:
 		BotDifficulty.EASY:
-			if randf() < 1:  # (100% pra debug) 20% chance de denunciar
+			if randf() < 0.25:  # 25% chance de denunciar
 				return true
 			else:
 				return false
 		BotDifficulty.MEDIUM:
-			if randf() < 0.45:  # 45% chance de denunciar
+			if randf() < 0.50:  # 50% chance de denunciar
 				return true
 			else:
 				return false
 		BotDifficulty.HARD:
-			if randf() < 0.7:  # 70% chance de denunciar
+			if randf() < 0.75:  # 75% chance de denunciar
 				return true
 			else:
 				return false
