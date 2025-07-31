@@ -20,6 +20,10 @@ config/icon="res://icon.svg"
 NetworkManager="*res://scripts/NetworkManager.gd"
 GameManagerMultiplayer="*res://scripts/game_manager_multiplayer.gd"
 
+[display]
+
+window/stretch/mode="canvas_items"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
