@@ -11,13 +11,14 @@ config_version=5
 [application]
 
 config/name="Dominozada"
-run/main_scene="uid://bwui6cfgnq0pi"
+run/main_scene="uid://02yun2wu5mjn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-GameManager="*res://scripts/game_manager.gd"
+NetworkManager="*res://scripts/NetworkManager.gd"
+GameManagerMultiplayer="*res://scripts/game_manager_multiplayer.gd"
 
 [rendering]
 

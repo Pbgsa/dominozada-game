@@ -1,60 +1,81 @@
+# scripts/opponent_hands.gd
 extends Control
 
 @onready var top_hand = $TopHand
 @onready var left_hand = $LeftHand
 @onready var right_hand = $RightHand
 
-var game_manager: Node = null
+var ui_map: Dictionary = {}
+var game_manager
 
 func _ready():
-	# Conectar com o GameManager
-	game_manager = get_node("/root/GameManager") if has_node("/root/GameManager") else null
-	if game_manager:
-		game_manager.player_hand_changed.connect(_on_player_hand_changed)
-		game_manager.game_started.connect(_on_game_started)
-		game_manager.piece_distributed.connect(_on_pieces_distributed)
-	
-	# Debug initialization (fallback se GameManager não estiver ativo)
-	await get_tree().process_frame  # Wait for hands to be ready
-	if not game_manager:
-		update_hands({"top": 6, "left": 6, "right": 6})
+	if NetworkManager.is_online_mode:
+		game_manager = GameManagerMultiplayer
+	else:
+		game_manager = get_node("/root/Board/GameManager")
 
-func update_hands(pieces_by_player: Dictionary):
-	# Correct orientations for each position
-	if top_hand:
-		top_hand.set_piece_count(pieces_by_player.get("top", 0), "up")  # Top uses "up" orientation
-	if left_hand:
-		left_hand.set_piece_count(pieces_by_player.get("left", 0), "left")  # Left uses "left" orientation
-	if right_hand:
-		right_hand.set_piece_count(pieces_by_player.get("right", 0), "right")  # Right uses "right" orientation
-
-func _on_player_hand_changed(player_id: int, new_count: int):
-	"""Atualiza a mão do oponente quando a quantidade de peças muda"""
-	# player_id 0 = jogador humano (não exibido aqui)
-	# player_id 1 = oponente do topo
-	# player_id 2 = oponente da esquerda  
-	# player_id 3 = oponente da direita
-	
-	match player_id:
-		1:  # Top opponent
-			if top_hand:
-				top_hand.set_piece_count(new_count, "up")
-		2:  # Left opponent
-			if left_hand:
-				left_hand.set_piece_count(new_count, "left")
-		3:  # Right opponent
-			if right_hand:
-				right_hand.set_piece_count(new_count, "right")
+	game_manager.game_started.connect(_on_game_started)
+	game_manager.player_hand_count_changed.connect(_on_player_hand_count_changed)
 
 func _on_game_started():
-	"""Quando o jogo inicia, resetar todas as mãos para 7 peças"""
-	update_hands({"top": 7, "left": 7, "right": 7})
+	var my_id = 1 # No offline, nosso ID é sempre 1
+	if NetworkManager.is_online_mode:
+		my_id = multiplayer.get_unique_id()
+	
+	var all_players = game_manager.turn_order.duplicate()
+	all_players.erase(my_id)
+	
+	if all_players.size() > 0: 
+		ui_map[all_players[0]] = top_hand
+		_update_opponent_label(top_hand, all_players[0])
+	if all_players.size() > 1: 
+		ui_map[all_players[1]] = left_hand  
+		_update_opponent_label(left_hand, all_players[1])
+	if all_players.size() > 2: 
+		ui_map[all_players[2]] = right_hand
+		_update_opponent_label(right_hand, all_players[2])
+	
+	top_hand.set_piece_count(7, "up")
+	left_hand.set_piece_count(7, "left")
+	right_hand.set_piece_count(7, "right")
 
-func _on_pieces_distributed():
-	"""Quando as peças são distribuídas, definir quantidade inicial"""
-	if game_manager:
-		var top_count = game_manager.players[1].get_hand_count() if game_manager.players.size() > 1 else 7
-		var left_count = game_manager.players[2].get_hand_count() if game_manager.players.size() > 2 else 7
-		var right_count = game_manager.players[3].get_hand_count() if game_manager.players.size() > 3 else 7
+func _update_opponent_label(hand_node: Node, player_id: int):
+	"""Atualiza o label do oponente com o nome do jogador"""
+	var player_name = "Jogador " + str(player_id)
+	
+	if NetworkManager.is_online_mode and player_id in NetworkManager.players:
+		player_name = NetworkManager.players[player_id]
+	elif not NetworkManager.is_online_mode and game_manager and "players" in game_manager:
+		if player_id in game_manager.players:
+			var player_data = game_manager.players[player_id]
+			if typeof(player_data) == TYPE_DICTIONARY and "name" in player_data:
+				player_name = player_data.name
+			elif player_data.has_method("get") and "player_name" in player_data:
+				player_name = player_data.player_name
+	
+	# Tentar encontrar um label filho do hand_node para mostrar o nome
+	if hand_node.has_method("set_player_name"):
+		hand_node.set_player_name(player_name)
+	elif hand_node.get_child_count() > 0:
+		# Procurar por um Label nos filhos
+		for child in hand_node.get_children():
+			if child is Label:
+				child.text = player_name
+				break
+
+
+func _on_player_hand_count_changed(player_id: int, new_count: int):
+	var my_id = 1
+	if NetworkManager.is_online_mode:
+		my_id = multiplayer.get_unique_id()
 		
-		update_hands({"top": top_count, "left": left_count, "right": right_count})
+	if player_id == my_id:
+		return
+
+	if ui_map.has(player_id):
+		var hand_node = ui_map[player_id]
+		var direction = "up"
+		if hand_node == left_hand: direction = "left"
+		if hand_node == right_hand: direction = "right"
+		
+		hand_node.set_piece_count(new_count, direction)

@@ -48,10 +48,6 @@ grow_vertical = 0
 layout_mode = 2
 text = "Passar Vez"
 
-[node name="StartButton" type="Button" parent="MainContainer/ActionButtons"]
-layout_mode = 2
-text = "Iniciar Jogo"
-
 [node name="GameOverPanel" type="Panel" parent="MainContainer"]
 visible = false
 layout_mode = 1
