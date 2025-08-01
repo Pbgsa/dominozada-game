@@ -322,8 +322,9 @@ func add_piece_to_board_on_side(data: Dictionary, placement_side: String):
 				pieces_sequence.push_front({"a": piece_a, "b": piece_b})
 				left_value = piece_a
 			else: #GATO COM LEBRE
-				#falta poder escolher que lado jogar
+				#falta poder escolher que lado da peça jogar
 				pieces_sequence.push_front({"a": piece_a, "b": piece_b})
+				left_value = piece_a
 			create_visual_piece_at_side("left")
 			
 		"right":
@@ -334,8 +335,9 @@ func add_piece_to_board_on_side(data: Dictionary, placement_side: String):
 				pieces_sequence.append({"a": piece_b, "b": piece_a})
 				right_value = piece_a
 			else: #GATO COM LEBRE
-				#falta poder escolher que lado jogar
+				#falta poder escolher que lado da peça jogar
 				pieces_sequence.append({"a": piece_a, "b": piece_b})
+				right_value = piece_b
 			create_visual_piece_at_side("right")
 	
 	update_head_positions()
@@ -420,11 +422,13 @@ func remove_piece_from_a_side(piece: Dictionary, side: String, player_id: int):
 		if pieces_sequence[0].a == piece.a and pieces_sequence[0].b == piece.b:
 			played_pieces.remove_child(visual_pieces[0])
 			pieces_sequence.pop_front()
+			left_value = pieces_sequence[0].a
 			remove_visual_at_side("left")
 			player_hand.return_piece_to_hand(player_id, piece)
 		elif pieces_sequence[0].a == piece.b and pieces_sequence[0].b == piece.a:
 			played_pieces.remove_child(visual_pieces[0])
 			pieces_sequence.pop_front()
+			left_value = pieces_sequence[0].a
 			remove_visual_at_side("left")
 			player_hand.return_piece_to_hand(player_id, piece)
 		else:
@@ -434,11 +438,13 @@ func remove_piece_from_a_side(piece: Dictionary, side: String, player_id: int):
 		if pieces_sequence[pieces_sequence.size() - 1].a == piece.a and pieces_sequence[pieces_sequence.size() - 1].b == piece.b:
 			played_pieces.remove_child(visual_pieces[visual_pieces.size() - 1])
 			pieces_sequence.pop_back()
+			right_value = pieces_sequence[pieces_sequence.size() - 1].b
 			remove_visual_at_side("right")
 			player_hand.return_piece_to_hand(player_id, piece)
 		elif pieces_sequence[pieces_sequence.size() - 1].a == piece.b and pieces_sequence[pieces_sequence.size() - 1].b == piece.a:
 			played_pieces.remove_child(visual_pieces[visual_pieces.size() - 1])
 			pieces_sequence.pop_back()
+			right_value = pieces_sequence[pieces_sequence.size() - 1].b
 			remove_visual_at_side("right")
 			player_hand.return_piece_to_hand(player_id, piece)
 		else:
