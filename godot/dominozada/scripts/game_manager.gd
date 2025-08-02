@@ -89,7 +89,7 @@ func start_new_game():
 	"""Inicia uma nova partida"""
 	print("Iniciando novo jogo...")
 	current_state = GameState.PLAYING
-	# Altere o modo de jogo aqui (posteriormente deve ser alterado pelo menu)
+	# Altere o modo de jogo aqui!! (posteriormente deve ser alterado pelo menu)
 	current_mode = GameMode.GATO_COM_LEBRE
 	current_player = 0
 	consecutive_passes = 0
@@ -167,16 +167,13 @@ func play_piece(player_id: int, piece: Dictionary, side: String) -> bool:
 		
 		# Emitir sinal de mudança na mão do jogador
 		player_hand_changed.emit(player_id, player.get_hand_count())
-		
-		# Verificar vitória
-		
+
+		# Verificar vitória (await em caso de denuncia bem sucedida de gato com lebre)
 		if player.get_hand_count() == 0:
 			await get_tree().create_timer(3).timeout
 			if player.get_hand_count() == 0:
 				end_game(player_id, GameOverReason.EMPTY_HAND)
 				return true
-			next_turn()
-			return true
 		
 		# Próximo turno
 		next_turn()
@@ -190,9 +187,8 @@ func play_piece(player_id: int, piece: Dictionary, side: String) -> bool:
 			"round": current_round
 		}
 
-		print("Jogada inválida permitida no modo Gato com Lebre!")
-		print("Última jogada inválida:", last_invalid_move)
-		board.place_piece(piece, side) # ver se vai funcionar mesmo
+		print("Gato com Lebre! ->", last_invalid_move)
+		board.place_piece(piece, side)
 		player.remove_piece_from_hand(piece)
 		consecutive_passes = 0
 
@@ -204,8 +200,6 @@ func play_piece(player_id: int, piece: Dictionary, side: String) -> bool:
 			if player.get_hand_count() == 0:
 				end_game(player_id, GameOverReason.EMPTY_HAND)
 				return true
-			next_turn()
-			return true
 		
 		next_turn()
 		return true
@@ -254,15 +248,14 @@ func execute_bot_turn():
 	
 	var move = bot.decide_move(board, last_invalid_move, is_gato_com_lebre)
 	
+	await get_tree().create_timer(2).timeout
+	last_invalid_move = {}
+	
 	if move.has("piece") and move.has("side"):
-		await get_tree().create_timer(2).timeout
-		last_invalid_move = {}  # Limpar jogada inválida após jogada válida do bot
 		var side_text = "esquerda" if move.side == "left" else "direita"
 		bot_action_message.emit("%s jogou na %s" % [bot.player_name, side_text])
 		await play_piece(current_player, move.piece, move.side)
 	else:
-		await get_tree().create_timer(2).timeout
-		last_invalid_move = {}  # Limpar jogada inválida após bot passar a vez
 		bot_action_message.emit("%s passou a vez" % bot.player_name)
 		pass_turn(current_player)
 
@@ -317,9 +310,7 @@ func report_invalid_move():
 	
 	var player_id = last_invalid_move["player_id"]
 	var piece = last_invalid_move["piece"]
-	var side = last_invalid_move["side"]
-	
-	print("Denunciando jogada inválida de %s: peça [%d,%d] no lado %s" % [players[player_id].player_name, piece.a, piece.b, side])
+	print("Denunciando jogada inválida de %s: peça [%d,%d]" % [players[player_id].player_name, piece.a, piece.b])
 	
 	board.remove_piece(last_invalid_move)
-	last_invalid_move.clear()  # Limpar após denúncia
+	last_invalid_move.clear()

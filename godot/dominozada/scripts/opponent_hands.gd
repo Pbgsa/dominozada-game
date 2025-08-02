@@ -31,20 +31,20 @@ func update_hands(pieces_by_player: Dictionary):
 func _on_player_hand_changed(player_id: int, new_count: int):
 	"""Atualiza a mão do oponente quando a quantidade de peças muda"""
 	# player_id 0 = jogador humano (não exibido aqui)
-	# player_id 1 = oponente do topo
-	# player_id 2 = oponente da esquerda  
-	# player_id 3 = oponente da direita
-	
+	# player_id 1 = oponente da direita
+	# player_id 2 = oponente do topo
+	# player_id 3 = oponente da esquerda
+
 	match player_id:
+		1:  # Right opponent
+			if right_hand:
+				right_hand.set_piece_count(new_count, "right")
 		2:  # Top opponent
 			if top_hand:
 				top_hand.set_piece_count(new_count, "up")
 		3:  # Left opponent
 			if left_hand:
 				left_hand.set_piece_count(new_count, "left")
-		1:  # Right opponent
-			if right_hand:
-				right_hand.set_piece_count(new_count, "right")
 
 func _on_game_started():
 	"""Quando o jogo inicia, resetar todas as mãos para 7 peças"""

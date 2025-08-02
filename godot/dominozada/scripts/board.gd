@@ -124,8 +124,8 @@ func create_visual_piece_at_side(side: String):
 	if side == "left":
 		sequence_piece = pieces_sequence[0]
 	else:  # side == "right"
-		sequence_piece = pieces_sequence[pieces_sequence.size() - 1]
-	
+		sequence_piece = pieces_sequence[pieces_sequence.size()-1]
+
 	var piece_a = sequence_piece.a
 	var piece_b = sequence_piece.b
 	var direction = get_piece_orientation(piece_a, piece_b)
@@ -194,7 +194,7 @@ func calculate_piece_position_by_side(side: String) -> Vector2:
 			var rightmost_position = rightmost_piece.position
 			
 			# Get orientation of current piece (to be added)
-			var current_piece = pieces_sequence[pieces_sequence.size() - 1]
+			var current_piece = pieces_sequence[pieces_sequence.size()-1]
 			var current_orientation = get_piece_orientation(current_piece.a, current_piece.b)
 			
 			# Get orientation of adjacent piece
@@ -311,7 +311,6 @@ func add_piece_to_board_on_side(data: Dictionary, placement_side: String):
 		create_visual_piece_at_center()
 		return
 	
-	print("DEEBBUUGG: [%d,%d] no lado %s" % [piece_a, piece_b, placement_side])
 	# Place piece on specified side
 	match placement_side:
 		"left":
@@ -321,8 +320,7 @@ func add_piece_to_board_on_side(data: Dictionary, placement_side: String):
 			elif piece_b == left_value:
 				pieces_sequence.push_front({"a": piece_a, "b": piece_b})
 				left_value = piece_a
-			else: #GATO COM LEBRE
-				#falta poder escolher que lado da peça jogar
+			else: # GATO COM LEBRE
 				pieces_sequence.push_front({"a": piece_a, "b": piece_b})
 				left_value = piece_a
 			create_visual_piece_at_side("left")
@@ -334,8 +332,7 @@ func add_piece_to_board_on_side(data: Dictionary, placement_side: String):
 			elif piece_b == right_value:
 				pieces_sequence.append({"a": piece_b, "b": piece_a})
 				right_value = piece_a
-			else: #GATO COM LEBRE
-				#falta poder escolher que lado da peça jogar
+			else: # GATO COM LEBRE
 				pieces_sequence.append({"a": piece_a, "b": piece_b})
 				right_value = piece_b
 			create_visual_piece_at_side("right")
@@ -377,7 +374,6 @@ func get_connection_info(piece_a: int, piece_b: int) -> Dictionary:
 
 	if game_manager.current_mode == game_manager.GameMode.GATO_COM_LEBRE:
 		info.can_connect = true
-		return info
 	
 	return info
 
@@ -402,8 +398,8 @@ func place_piece(piece: Dictionary, side: String):
 		add_piece_to_board_on_side(piece, side)
 
 func remove_piece(last_invalid_move: Dictionary): # { player_id, piece, side, round }
-	"""Remove a piece from the board (used for invalid moves)"""
-	print("Tentando remover peça inválida do tabuleiro: ", last_invalid_move)
+	"""Remove uma peça do tabuleiro (usado para jogadas inválidas)"""
+	print("Tentando remover peça inválida do tabuleiro: ", last_invalid_move.piece)
 
 	if pieces_sequence.is_empty():
 		print("Erro: Não há peças no tabuleiro para remover.")
@@ -416,16 +412,11 @@ func remove_piece(last_invalid_move: Dictionary): # { player_id, piece, side, ro
 	remove_piece_from_a_side(invalid_piece, invalid_piece_side, invalid_piece_player_id)
 
 func remove_piece_from_a_side(piece: Dictionary, side: String, player_id: int):
-	"""Remove a piece from the specified side"""
+	"""Remove uma peça de um lado específico do tabuleiro"""
+
 	if side == "left":
-		print("Peça comparada LEFT", pieces_sequence[0])
-		if pieces_sequence[0].a == piece.a and pieces_sequence[0].b == piece.b:
-			played_pieces.remove_child(visual_pieces[0])
-			pieces_sequence.pop_front()
-			left_value = pieces_sequence[0].a
-			remove_visual_at_side("left")
-			player_hand.return_piece_to_hand(player_id, piece)
-		elif pieces_sequence[0].a == piece.b and pieces_sequence[0].b == piece.a:
+		var piece_L = pieces_sequence[0]
+		if (piece_L.a == piece.a and piece_L.b == piece.b) or (piece_L.a == piece.b and piece_L.b == piece.a):
 			played_pieces.remove_child(visual_pieces[0])
 			pieces_sequence.pop_front()
 			left_value = pieces_sequence[0].a
@@ -433,35 +424,29 @@ func remove_piece_from_a_side(piece: Dictionary, side: String, player_id: int):
 			player_hand.return_piece_to_hand(player_id, piece)
 		else:
 			print("Erro: Peça não encontrada no lado esquerdo.")
+
 	elif side == "right":
-		print("Peça comparada RIGHT", pieces_sequence[pieces_sequence.size() - 1])
-		if pieces_sequence[pieces_sequence.size() - 1].a == piece.a and pieces_sequence[pieces_sequence.size() - 1].b == piece.b:
+		var piece_R = pieces_sequence[pieces_sequence.size()-1]
+		if (piece_R.a == piece.a and piece_R.b == piece.b) or (piece_R.a == piece.b and piece_R.b == piece.a):
 			played_pieces.remove_child(visual_pieces[visual_pieces.size() - 1])
 			pieces_sequence.pop_back()
-			right_value = pieces_sequence[pieces_sequence.size() - 1].b
-			remove_visual_at_side("right")
-			player_hand.return_piece_to_hand(player_id, piece)
-		elif pieces_sequence[pieces_sequence.size() - 1].a == piece.b and pieces_sequence[pieces_sequence.size() - 1].b == piece.a:
-			played_pieces.remove_child(visual_pieces[visual_pieces.size() - 1])
-			pieces_sequence.pop_back()
-			right_value = pieces_sequence[pieces_sequence.size() - 1].b
+			right_value = pieces_sequence[pieces_sequence.size()-1].b
 			remove_visual_at_side("right")
 			player_hand.return_piece_to_hand(player_id, piece)
 		else:
 			print("Erro: Peça não encontrada no lado direito.")
+
 	else:
-		print("Erro: Lado inválido para remoção de peça.")
+		print("Erro: Lado inválido, deve ser 'left' ou 'right'")
 
 	update_head_positions()
 
 func remove_visual_at_side(side: String):
-	"""Remove the visual piece from the specified side"""
-	print("AAAAAAAAAAa", pieces_sequence)
+	"""Remove a peça visual do lado especificado"""
 	if side == "left":
 		visual_pieces.pop_front()
 	else:
 		visual_pieces.pop_back()
-	print("BBBBBBBBBBBBBB", visual_pieces)
 
 func get_left_value() -> int:
 	"""Retorna o valor da extremidade esquerda"""

@@ -14,10 +14,8 @@ func decide_move(board: Node, last_invalid_move: Dictionary, is_gato_com_lebre: 
 	var playable_pieces = get_playable_pieces(board)
 
 	if last_invalid_move.has("piece"):
-		# chama uma função para denunciar a jogada inválida
 		if try_to_report_invalid_move(board, last_invalid_move):
 			print("Jogada inválida denunciada com sucesso!")
-			# aqui vai ter de adicionar uma punição ao jogador (ou bot) anterior
 			board.remove_piece(last_invalid_move)
 		else:
 			print("A jogada inválida passou despercebida.")
@@ -36,34 +34,32 @@ func decide_move(board: Node, last_invalid_move: Dictionary, is_gato_com_lebre: 
 			return decide_easy_move(board, playable_pieces)
 
 func decide_easy_move(board: Node, playable_pieces: Array[Dictionary]) -> Dictionary:
-	# se chegou até aqui, significa que pode tentar gato com lebre
+	"""Possível gato com lebre"""
 	if playable_pieces.is_empty():
 		if randf() < 0.25: # 25% de chance de jogar gato com lebre
 			var pieces_in_hand = get_hand_pieces()
 			var side = "left" if randf() < 0.5 else "right"
 			if pieces_in_hand.is_empty():
-				return {}  # Sem peças na mão, não pode jogar
+				return {}
 			else:
 				return {"piece": pieces_in_hand[0], "side": side}
 		else:
 			return {}
 
-
 	"""Estratégia simples: joga a primeira peça possível"""
-
 	var piece = playable_pieces[0]
 	var side = get_preferred_side(board, piece)
 	
 	return {"piece": piece, "side": side}
 
 func decide_medium_move(board: Node, playable_pieces: Array[Dictionary]) -> Dictionary:
-	# se chegou até aqui, significa que pode tentar gato com lebre
+	"""Possível gato com lebre"""
 	if playable_pieces.is_empty():
 		if randf() < 0.5: # 50% de chance de jogar gato com lebre
 			var pieces_in_hand = get_hand_pieces()
 			var side = "left" if randf() < 0.5 else "right"
 			if pieces_in_hand.is_empty():
-				return {}  # Sem peças na mão, não pode jogar
+				return {}
 			else:
 				return {"piece": pieces_in_hand[0], "side": side}
 		else:
@@ -115,22 +111,14 @@ func try_to_report_invalid_move(board: Node, last_invalid_move: Dictionary) -> b
 
 	match difficulty:
 		BotDifficulty.EASY:
-			if randf() < 0.25:  # 25% chance de denunciar
-				return true
-			else:
-				return false
+			# 25% chance de denunciar
+			return randf() < 0.25
 		BotDifficulty.MEDIUM:
-			if randf() < 0.50:  # 50% chance de denunciar
-				return true
-			else:
-				return false
+			# 50% chance de denunciar
+			return randf() < 0.50
 		BotDifficulty.HARD:
-			if randf() < 0.75:  # 75% chance de denunciar
-				return true
-			else:
-				return false
+			# 75% chance de denunciar
+			return randf() < 0.75
 		_:
-			if randf() < 0.2:  # 20% chance de denunciar
-				return true
-			else:
-				return false
+			# 25% chance de denunciar
+			return randf() < 0.25

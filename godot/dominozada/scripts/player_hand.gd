@@ -80,7 +80,6 @@ func _on_piece_selected(button):
 	if available_sides.size() == 0 and game_manager.current_mode == game_manager.GameMode.GATO_COM_LEBRE:
 		available_sides.append("left")
 		available_sides.append("right")
-		print("Adicionando lados padrão para Gato com Lebre: left e right")
 	print("Lados disponíveis: ", available_sides)
 	
 	if available_sides.size() == 0:
@@ -232,13 +231,12 @@ func _on_piece_played(player_id: int, piece: Dictionary):
 		remove_piece_from_hand(piece)
 
 func return_piece_to_hand(player_id: int, piece: Dictionary):
-	#players = game_manager.players if game_manager else []
 	for player in game_manager.players:
 		if player.player_id == player_id:
 			print("Retornando peça [%d,%d] à mão do jogador %d" % [piece.a, piece.b, player_id])
+			player.add_piece_to_hand(piece)
+
 			if (player_id == 0):
-				player.add_piece_to_hand(piece)
 				add_piece(piece.a, piece.b)
-			else: 
-				player.add_piece_to_hand(piece)
+				
 			game_manager.player_hand_changed.emit(player_id, player.get_hand_count())
