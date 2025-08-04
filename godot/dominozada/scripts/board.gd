@@ -1,7 +1,7 @@
 # scripts/board.gd
-extends Node2D
+extends Control
 
-@onready var played_pieces_container := $PlayedPieces
+@onready var played_pieces_container := $GameArea/PlayedPieces
 @onready var offline_game_manager = $GameManager
 @export var domino_piece_scene: PackedScene = preload("res://scenes/domino_piece.tscn")
 

@@ -8,43 +8,65 @@
 [ext_resource type="PackedScene" uid="uid://1nodedq6gwob" path="res://scenes/game_ui.tscn" id="6_game_ui"]
 [ext_resource type="Script" uid="uid://bds5waf8c1fyw" path="res://scripts/GameManager.gd" id="7_c3r7o"]
 
-[node name="Board" type="Node2D"]
+[node name="Board" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 script = ExtResource("1_tx6nw")
 
-[node name="TableBackground" type="Sprite2D" parent="."]
-position = Vector2(561, 320)
-scale = Vector2(2, 2.045)
+[node name="TableBackground" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 texture = ExtResource("2_dxjtj")
+expand_mode = 1
 
-[node name="PlayedPieces" type="Node2D" parent="."]
-position = Vector2(564, 319)
+[node name="GameArea" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -100.0
+offset_right = 200.0
+offset_bottom = 100.0
 
-[node name="Heads" type="Node2D" parent="."]
-position = Vector2(564, 319)
+[node name="PlayedPieces" type="Node2D" parent="GameArea"]
+position = Vector2(200, 100)
 
-[node name="LeftHead" type="Marker2D" parent="Heads"]
+[node name="Heads" type="Node2D" parent="GameArea"]
+position = Vector2(200, 100)
+
+[node name="LeftHead" type="Marker2D" parent="GameArea/Heads"]
 position = Vector2(100, 0)
 gizmo_extents = 1.0
 
-[node name="RightHead" type="Marker2D" parent="Heads"]
-position = Vector2(-100, 0)
+[node name="RightHead" type="Marker2D" parent="GameArea/Heads"]
+position = Vector2(300, 0)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="OpponentHands" parent="CanvasLayer" instance=ExtResource("4_fv4ni")]
-offset_left = -6.0
-offset_top = 3.0
-offset_right = -3.0
-offset_bottom = 3.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
 
 [node name="PlayerHand" parent="CanvasLayer" instance=ExtResource("3_nglv8")]
 
 [node name="ChangeBackgroundButton" parent="CanvasLayer" node_paths=PackedStringArray("table_sprite") instance=ExtResource("5_dxjtj")]
-offset_left = 970.0
-offset_top = 9.0
-offset_right = 1133.0
-offset_bottom = 47.0
-text = "Change background"
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -140.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 40.0
+text = "Change BG"
 table_sprite = NodePath("../../TableBackground")
 
 [node name="GameUI" parent="CanvasLayer" instance=ExtResource("6_game_ui")]
