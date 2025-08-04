@@ -20,10 +20,10 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.0
-offset_left = -200.0
-offset_top = 20.0
-offset_right = 200.0
-offset_bottom = 80.0
+offset_left = -175.0
+offset_top = 15.0
+offset_right = 175.0
+offset_bottom = 45.0
 grow_horizontal = 2
 
 [node name="LeftHand" parent="." instance=ExtResource("3_mwnbu")]
@@ -31,10 +31,10 @@ layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = 73.0
-offset_top = -197.0
-offset_right = 133.0
-offset_bottom = 203.0
+offset_left = 15.0
+offset_top = -60.0
+offset_right = 45.0
+offset_bottom = 60.0
 grow_vertical = 2
 
 [node name="RightHand" parent="." instance=ExtResource("3_mwnbu")]
@@ -44,9 +44,9 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -120.0
-offset_top = -202.0
-offset_right = -60.0
-offset_bottom = 198.0
+offset_left = -45.0
+offset_top = -60.0
+offset_right = -15.0
+offset_bottom = 60.0
 grow_horizontal = 0
 grow_vertical = 2
