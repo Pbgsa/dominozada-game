@@ -1,5 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://b8uxtqu05aic5"]
+[gd_scene load_steps=4 format=3 uid="uid://dq2c0264apsyn"]
 
+[ext_resource type="Theme" uid="uid://f7x1vcbq15h1" path="res://ui/menu_theme.tres" id="1_bqqt6"]
 [ext_resource type="Script" uid="uid://uwlcfmwdonkb" path="res://scripts/main_menu.gd" id="1_ekxnf"]
 [ext_resource type="Texture2D" uid="uid://mn86vn6pi3it" path="res://assets/textures/table_backgrounds/zdefault_table.png" id="1_l6cm7"]
 
@@ -10,6 +11,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_bqqt6")
 script = ExtResource("1_ekxnf")
 
 [node name="TextureRect" type="TextureRect" parent="."]
@@ -38,23 +40,39 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Dominozada maneiro muito fodão"
 
-[node name="BotaoModoClassico" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="BotaoModoClassico" type="Button" parent="CenterContainer/VBoxContainer" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 4
 text = "Modo clássico"
 
-[node name="BotaoModoBurrinho" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="BotaoModoBurrinho" type="Button" parent="CenterContainer/VBoxContainer" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 4
 text = "Modo burrinho"
 
-[node name="BotaoModoGatoComLebre" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="BotaoModoGatoComLebre" type="Button" parent="CenterContainer/VBoxContainer" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 4
 text = "Modo gato com lebre"
 
-[node name="BotaoMultiplayer" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="BotaoMultiplayer" type="Button" parent="CenterContainer/VBoxContainer" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 4
 text = "Criar Lobby multiplayer"
 
+[connection signal="mouse_entered" from="CenterContainer/VBoxContainer/BotaoModoClassico" to="." method="_on_botao_modo_classico_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/VBoxContainer/BotaoModoClassico" to="." method="_on_botao_modo_classico_mouse_exited"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/BotaoModoClassico" to="." method="_on_botao_modo_classico_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/VBoxContainer/BotaoModoBurrinho" to="." method="_on_botao_modo_burrinho_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/VBoxContainer/BotaoModoBurrinho" to="." method="_on_botao_modo_burrinho_mouse_exited"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/BotaoModoBurrinho" to="." method="_on_botao_modo_burrinho_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/VBoxContainer/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/VBoxContainer/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_mouse_exited"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/VBoxContainer/BotaoMultiplayer" to="." method="_on_botao_multiplayer_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/VBoxContainer/BotaoMultiplayer" to="." method="_on_botao_multiplayer_mouse_exited"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/BotaoMultiplayer" to="." method="_on_botao_multiplayer_pressed"]
