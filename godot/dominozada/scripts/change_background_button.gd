@@ -4,7 +4,7 @@ const backgrounds_folder = "res://assets/textures/table_backgrounds/"
 var backgrounds: Array[Texture2D] = []
 var current_index = 0
 
-@export var table_sprite: Sprite2D
+@export var table_sprite: TextureRect
 
 func _ready():
 	_load_background()

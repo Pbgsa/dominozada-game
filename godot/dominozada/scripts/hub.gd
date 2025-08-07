@@ -1,14 +1,14 @@
 # scripts/hub.gd
-extends Node2D
+extends Control
 
 const MAX_PLAYERS := 4
 
-@onready var host_button: Button = $HostButton
-@onready var join_button: Button = $JoinButton
-@onready var start_button: Button = $StartButton
-@onready var ip_input: LineEdit = $IPInput
-@onready var player_list: VBoxContainer = $PlayerList
-@onready var player_name_input: LineEdit = $PlayerNameInput
+@onready var host_button: Button = $MainContainer/TopRow/HostButton
+@onready var join_button: Button = $MainContainer/TopRow/JoinButton
+@onready var start_button: Button = $MainContainer/TopRow/StartButton
+@onready var ip_input: LineEdit = $MainContainer/TopRow/IPInput
+@onready var player_list: VBoxContainer = $MainContainer/PlayerList
+@onready var player_name_input: LineEdit = $MainContainer/TopRow/PlayerNameInput
 
 func _ready():
 	host_button.pressed.connect(_on_host_pressed)

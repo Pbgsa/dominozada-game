@@ -1,5 +1,5 @@
 # scripts/menu.gd
-extends Node2D
+extends Control
 
 func _on_online_button_pressed() -> void:
 	# Define o modo como online e vai para o Hub
