@@ -202,8 +202,11 @@ func _on_new_game_button_pressed():
 
 func _on_buy_button_pressed():
 	"""Jogador humano compra uma peça do boneyard"""
-	if game_manager and game_manager.is_human_turn():
-		game_manager.buy_piece()
+	if NetworkManager.is_online_mode:
+		game_manager.server_buy_piece.rpc()
+	else:
+		if game_manager and game_manager.is_human_turn():
+			game_manager.buy_piece()
 
 func update_ui_state():
 	"""Atualiza estado geral da UI - apenas modo offline"""
