@@ -7,6 +7,7 @@ const MAX_PLAYERS := 4
 @onready var host_button: Button = $MainContainer/TopRow/HostButton
 @onready var join_button: Button = $MainContainer/TopRow/JoinButton
 @onready var start_button: Button = $MainContainer/TopRow/StartButton
+@onready var lobby_exit_button: Button = $MainContainer/BottomRow/LobbyExitButton
 @onready var ip_input: LineEdit = $MainContainer/TopRow/IPInput
 @onready var player_list: VBoxContainer = $MainContainer/PlayerList
 @onready var player_name_input: LineEdit = $MainContainer/TopRow/PlayerNameInput
@@ -15,6 +16,7 @@ func _ready():
 	host_button.pressed.connect(_on_host_pressed)
 	join_button.pressed.connect(_on_join_pressed)
 	start_button.pressed.connect(_on_start_pressed)
+	lobby_exit_button.pressed.connect(_on_lobby_exit_pressed)
 	
 	NetworkManager.player_list_changed.connect(update_player_list_ui)
 	NetworkManager.player_ready_status_changed.connect(update_player_ready_status_ui)
@@ -30,10 +32,15 @@ func _on_host_pressed():
 	var player_name = player_name_input.text if player_name_input.text.strip_edges() != "" else "Host"
 	NetworkManager.create_host(player_name)
 
-
 func _on_join_pressed():
 	var player_name = player_name_input.text if player_name_input.text.strip_edges() != "" else "Jogador"
 	NetworkManager.join_server(ip_input.text, player_name)
+	
+func _on_lobby_exit_pressed():
+	if multiplayer.multiplayer_peer:
+		multiplayer.multiplayer_peer.close()
+		multiplayer.multiplayer_peer = null
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 func _on_connection_succeeded():
 	host_button.disabled = true

@@ -9,6 +9,8 @@ extends CanvasLayer
 @onready var reason_label := $MainContainer/GameOverPanel/GameOverContent/ReasonLabel
 @onready var new_game_button := $MainContainer/GameOverPanel/GameOverContent/NewGameButton if has_node("MainContainer/GameOverPanel/GameOverContent/NewGameButton") else null
 @onready var buy_button := $MainContainer/ActionButtons/BuyButton
+@onready var lobby_button := $MainContainer/GameOverPanel/GameOverContent/LobbyButton if has_node("MainContainer/GameOverPanel/GameOverContent/LobbyButton") else null
+@onready var main_menu_button := $MainContainer/GameOverPanel/GameOverContent/MainMenuButton if has_node("MainContainer/GameOverPanel/GameOverContent/MainMenuButton") else null
 
 var game_manager: Node
 var domino_set: RefCounted
@@ -43,6 +45,10 @@ func _ready():
 		start_button.pressed.connect(_on_start_button_pressed)
 	if new_game_button:
 		new_game_button.pressed.connect(_on_new_game_button_pressed)
+	if main_menu_button:
+		main_menu_button.pressed.connect(_on_main_menu_button_pressed)
+	if lobby_button:
+		lobby_button.pressed.connect(_on_lobby_button_pressed)
 	
 	# UI inicial - permitir inputs passarem através por padrão
 	if has_node("MainContainer"):
@@ -207,6 +213,22 @@ func _on_buy_button_pressed():
 	else:
 		if game_manager and game_manager.is_human_turn():
 			game_manager.buy_piece()
+			
+func _on_main_menu_button_pressed():
+	if NetworkManager.is_online_mode:
+		if multiplayer.multiplayer_peer:
+			multiplayer.multiplayer_peer.close()
+			multiplayer.multiplayer_peer = null
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	
+func _on_lobby_button_pressed():
+	if NetworkManager.is_online_mode:
+		if multiplayer.multiplayer_peer:
+			multiplayer.multiplayer_peer.close()
+			multiplayer.multiplayer_peer = null
+	else: 
+		NetworkManager.is_online_mode = true
+	get_tree().change_scene_to_file("res://scenes/Hub.tscn")
 
 func update_ui_state():
 	"""Atualiza estado geral da UI - apenas modo offline"""
