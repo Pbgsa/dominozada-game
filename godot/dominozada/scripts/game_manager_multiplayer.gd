@@ -10,6 +10,11 @@ signal piece_played_on_board(piece_data, side, player_id)
 signal game_over(winner_id, reason)
 signal player_passed_turn(player_id)
 
+enum GameMode {
+	CLASSICO,
+	PUXANDO_DO_MORTO
+}
+
 var domino_set = DominoSet.new()
 var players := {}
 var turn_order := []
@@ -17,6 +22,7 @@ var current_turn_index := 0
 # REMOVIDO: board_left_value, board_right_value, board_is_empty - usa o board como fonte da verdade
 var passes_in_a_row := 0
 var ready_players := []
+var current_mode: GameMode = GameMode.CLASSICO
 var board: Node  # Referência ao board
 
 func _ready():
@@ -74,6 +80,7 @@ func server_player_is_ready():
 
 func _start_actual_game():
 	# print("DEBUG MULTIPLAYER: Iniciando jogo...")
+	current_mode = GameMode.CLASSICO
 	
 	# Garantir que temos o board antes de iniciar o jogo
 	if not board or not is_instance_valid(board):
@@ -84,36 +91,50 @@ func _start_actual_game():
 	turn_order.push_front(1)
 	turn_order.shuffle()
 	
+	# --- CORREÇÃO 1: Enviar a ordem dos turnos para todos os clientes ---
+	rpc("client_set_turn_order", turn_order)
+	
 	# print("DEBUG MULTIPLAYER: turn_order configurado: %s" % turn_order)
 	# print("DEBUG MULTIPLAYER: Jogadores no NetworkManager: %s" % NetworkManager.players)
 	
 	# Gerar e embaralhar dominós
 	domino_set.generate_full_set()
 	domino_set.shuffle()
+
+	var initial_head_number
+	if GameMode.PUXANDO_DO_MORTO == current_mode:
+		initial_head_number = 3
+	else:
+		initial_head_number = 7
+		
 	
 	# Distribuir peças para cada jogador
 	for peer_id in turn_order:
 		players[peer_id] = {"hand": []}
-		for i in range(7): 
+		for i in range(initial_head_number): 
 			var piece = domino_set.draw_piece()
 			if piece:
 				players[peer_id].hand.append(piece)
 		rpc_id(peer_id, "client_receive_hand", players[peer_id].hand)
+		
+	
 		# print("DEBUG MULTIPLAYER: Distribuídas %d peças para jogador %d (%s)" % [players[peer_id].hand.size(), peer_id, NetworkManager.get_player_name(peer_id)])
 	
-	# Atualizar contadores de peças
-	for peer_id in turn_order:
-		rpc("client_update_player_hand_count", peer_id, 7)
-	
-	# Inicializar estado do jogo
-	passes_in_a_row = 0
-	current_turn_index = 0
-	
-	# print("DEBUG MULTIPLAYER: Estado inicial - current_turn_index: %d, primeiro jogador: %d (%s)" % [current_turn_index, turn_order[current_turn_index], NetworkManager.get_player_name(turn_order[current_turn_index])])
-	
-	# Iniciar jogo e definir primeiro turno
+	# --- CORREÇÃO 2: Mudar a ordem das chamadas RPC ---
+	# Primeiro, iniciar o jogo em todos os clientes
 	rpc("client_start_game")
-	_set_turn(turn_order[current_turn_index])
+	
+	# Depois, atualizar os contadores de peças de cada um
+	for peer_id in turn_order:
+		rpc("client_update_player_hand_count", peer_id, initial_head_number)
+	
+	# Por último, definir de quem é o primeiro turno
+	_set_turn(turn_order[current_turn_index]) 
+
+@rpc("authority", "call_local", "reliable")
+func client_set_turn_order(p_turn_order: Array):
+	"""Recebe e define a ordem dos turnos vinda do servidor."""
+	turn_order = p_turn_order
 
 @rpc("any_peer", "call_local", "reliable")
 func server_play_piece(piece_data: Dictionary, side: String):
@@ -264,6 +285,43 @@ func server_pass_turn():
 		rpc("client_game_over", winner_data.winner_id, reason)
 	else:
 		_next_turn()
+
+@rpc("any_peer", "call_local", "reliable")
+func server_buy_piece():
+	# Verificar se o servidor está ativo
+	if not multiplayer.is_server():
+		# print("DEBUG MULTIPLAYER: server_buy_piece chamado em cliente - ignorando")
+		return
+	
+	var sender_id = multiplayer.get_remote_sender_id()
+	if sender_id == 0: sender_id = 1
+	
+	# Verificações robustas
+	if turn_order.is_empty():
+		push_error("ERRO MULTIPLAYER: turn_order está vazio! Jogo não foi inicializado corretamente.")
+		return
+		
+	if current_turn_index < 0 or current_turn_index >= turn_order.size():
+		push_error("ERRO MULTIPLAYER: current_turn_index (%d) fora do range! turn_order.size(): %d" % [current_turn_index, turn_order.size()])
+		return
+	
+	# Verificar se é o turno do jogador
+	var expected_player = turn_order[current_turn_index]
+	if sender_id != expected_player:
+		print("DEBUG MULTIPLAYER: Não é o turno do jogador %d (esperado: %d)" % [sender_id, expected_player])
+		return
+	
+	var piece = domino_set.draw_piece()
+	if not piece:
+		print("DEBUG MULTIPLAYER: Boneyard vazio - não é possível comprar peça")
+		return
+	
+	players[sender_id].hand.append(piece)
+	rpc_id(sender_id, "client_receive_hand", players[sender_id].hand)
+	rpc("client_update_player_hand_count", sender_id, players[sender_id].hand.size())
+	print(current_turn_index)
+	
+	# print("DEBUG MULTIPLAYER: Jogador %d comprou peça [%d,%d]" % [sender_id, piece.a, piece.b])
 
 func _next_turn():
 	if turn_order.is_empty():

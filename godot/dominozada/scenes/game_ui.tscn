@@ -32,13 +32,13 @@ text = "Turno: Jogador"
 
 [node name="ActionButtons" type="HBoxContainer" parent="MainContainer"]
 layout_mode = 1
-anchors_preset = 3
+anchors_preset = -1
 anchor_left = 0.8
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -50.0
 offset_left = -10.0
+offset_top = -50.0
 offset_right = -10.0
 offset_bottom = -10.0
 grow_horizontal = 0
@@ -47,6 +47,10 @@ grow_vertical = 0
 [node name="PassButton" type="Button" parent="MainContainer/ActionButtons"]
 layout_mode = 2
 text = "Passar Vez"
+
+[node name="BuyButton" type="Button" parent="MainContainer/ActionButtons"]
+layout_mode = 2
+text = "Comprar Peça"
 
 [node name="GameOverPanel" type="Panel" parent="MainContainer"]
 visible = false

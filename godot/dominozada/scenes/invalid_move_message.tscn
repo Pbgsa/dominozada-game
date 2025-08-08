@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bvhgx0qsw8tjy"]
 
-[ext_resource type="Script" uid="uid://c3bp0ws72mh7f" path="res://scripts/invalid_move_message.gd" id="1_7vj8d"]
+[ext_resource type="Script" path="res://scripts/invalid_move_message.gd" id="1_7vj8d"]
 
 [node name="InvalidMoveMessage" type="CanvasLayer"]
 script = ExtResource("1_7vj8d")
@@ -37,10 +37,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -117.0
-offset_top = -52.0
-offset_right = 125.0
-offset_bottom = 52.0
+offset_left = 101.0
+offset_top = 32.0
+offset_right = 315.0
+offset_bottom = 108.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "INVALID MOVE!"
