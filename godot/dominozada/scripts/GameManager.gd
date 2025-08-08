@@ -18,7 +18,6 @@ signal game_over(winner_id, reason)
 signal piece_distributed
 signal player_passed(player_id: int)
 signal piece_played(player_id: int, piece: Dictionary)
-signal player_hand_changed(player_id: int, new_count: int)
 signal bot_action_message(message: String)
 
 enum GameState {
@@ -33,7 +32,13 @@ enum GameOverReason {
 	ALL_PASSED
 }
 
+enum GameMode {
+	CLASSICO,
+	PUXANDO_DO_MORTO
+}
+
 var current_state: GameState = GameState.MENU
+var current_mode: GameMode = GameMode.CLASSICO
 var domino_set: RefCounted
 var players_objects: Array[RefCounted] = []  # Array de objetos Player para sistema avançado
 var players = {
@@ -105,6 +110,7 @@ func start_new_game():
 	"""Inicia uma nova partida"""
 	print("Iniciando novo jogo...")
 	current_state = GameState.PLAYING
+	current_mode = GameMode.CLASSICO
 	current_turn_index = 0
 	consecutive_passes = 0
 	passes_in_a_row = 0
@@ -130,12 +136,21 @@ func start_new_game():
 
 func distribute_pieces():
 	"""Distribui 7 peças para cada jogador"""
-	for i in turn_order:
-		players[i].hand.clear()
-		for _j in range(7):
-			var piece = domino_set.draw_piece()
-			if piece:
-				players[i].hand.append(piece)
+	if GameMode.PUXANDO_DO_MORTO == current_mode:
+		"""Distribui 3 peças para cada jogador e deixa o restante no morto"""
+		for i in turn_order:
+			players[i].hand.clear()
+			for _j in range(3):
+				var piece = domino_set.draw_piece()
+				if piece:
+					players[i].hand.append(piece)
+	else:
+		for i in turn_order:
+			players[i].hand.clear()
+			for _j in range(7):
+				var piece = domino_set.draw_piece()
+				if piece:
+					players[i].hand.append(piece)
 	
 	# Sincronizar com objetos Player se existirem
 	for player_obj in players_objects:
@@ -154,7 +169,6 @@ func update_all_hand_counts():
 	"""Emite sinais de atualização para todas as mãos dos jogadores"""
 	for i in turn_order:
 		player_hand_count_changed.emit(i, players[i].hand.size())
-		player_hand_changed.emit(i, players[i].hand.size())
 
 func play_piece(piece_data: Dictionary, side: String):
 	"""Versão simplificada para compatibilidade com sistema atual"""
@@ -173,7 +187,6 @@ func play_piece(piece_data: Dictionary, side: String):
 	piece_played_on_board.emit(piece_data, side, 1)
 	piece_played.emit(1, piece_data)
 	player_hand_count_changed.emit(1, players[1].hand.size())
-	player_hand_changed.emit(1, players[1].hand.size())
 	passes_in_a_row = 0
 	consecutive_passes = 0
 	
@@ -219,7 +232,6 @@ func play_piece_advanced(player_id: int, piece: Dictionary, side: String) -> boo
 	piece_played_on_board.emit(piece, side, player_id)
 	piece_played.emit(player_id, piece)
 	player_hand_count_changed.emit(player_id, player_dict.hand.size())
-	player_hand_changed.emit(player_id, player_dict.hand.size())
 	consecutive_passes = 0
 	passes_in_a_row = 0
 	
@@ -414,7 +426,6 @@ func execute_bot_turn():
 			piece_played.emit(current_player_id, piece)
 			bot_hand.erase(piece)
 			player_hand_count_changed.emit(current_player_id, bot_hand.size())
-			player_hand_changed.emit(current_player_id, bot_hand.size())
 			passes_in_a_row = 0
 			consecutive_passes = 0
 			move_found = true
@@ -427,9 +438,38 @@ func execute_bot_turn():
 	
 	# Se não encontrou jogada, passa
 	if not move_found:
-		await get_tree().create_timer(1.0).timeout
-		bot_action_message.emit("%s passou a vez" % bot_data.name)
-		pass_turn_advanced(current_player_id)
+		if GameMode.PUXANDO_DO_MORTO == current_mode:
+			while domino_set.get_remaining_count() > 0:
+				var piece = domino_set.draw_piece()
+				if piece:
+					players[current_player_id].hand.append(piece)
+					add_a_purchased_piece_to_bot(piece)
+					var playable_sides = get_valid_sides_for_piece(piece)
+					if not playable_sides.is_empty():
+						var side_to_play = playable_sides[0]
+						await get_tree().create_timer(1.0).timeout
+						var side_text = "esquerda" if side_to_play == "left" else "direita"
+						bot_action_message.emit("%s jogou na %s" % [bot_data.name, side_text])
+						piece_played_on_board.emit(piece, side_to_play, current_player_id)
+						piece_played.emit(current_player_id, piece)
+						bot_hand.erase(piece)
+						player_hand_count_changed.emit(current_player_id, bot_hand.size())
+						passes_in_a_row = 0
+						consecutive_passes = 0
+						move_found = true
+						_next_turn()
+						return
+					else:
+						bot_action_message.emit("%s comprou uma peça, mas não pode jogar." % bot_data.name)
+
+			bot_action_message.emit("%s tentou comprar, mas o morto está vazio." % bot_data.name)
+			await get_tree().create_timer(1.0).timeout
+			bot_action_message.emit("%s passou a vez" % bot_data.name)
+			pass_turn_advanced(current_player_id)
+		else:
+			await get_tree().create_timer(1.0).timeout
+			bot_action_message.emit("%s passou a vez" % bot_data.name)
+			pass_turn_advanced(current_player_id)
 
 func _execute_bot_turn(bot_id: int):
 	"""Versão antiga mantida para compatibilidade"""
@@ -451,3 +491,33 @@ func _execute_bot_turn(bot_id: int):
 				_next_turn()
 			return
 	pass_turn()
+
+func add_a_purchased_piece_to_hand(piece: Dictionary):
+	var current_player_id = turn_order[current_turn_index]
+	for player in players_objects:
+		if player.player_id == current_player_id:
+			player.add_piece_to_hand(piece)
+			update_all_hand_counts()
+			return
+
+func add_a_purchased_piece_to_bot(piece: Dictionary):
+	var current_player_id = turn_order[current_turn_index]
+	for player in players_objects:
+		if player.player_id == current_player_id:
+			player.add_piece_to_hand(piece)
+			update_all_hand_counts()
+			return
+
+func buy_piece():
+	"""Compra de peça"""
+	var current_player_id = turn_order[current_turn_index]
+	var piece = domino_set.draw_piece()
+	if piece:
+		players[current_player_id].hand.append(piece)
+		add_a_purchased_piece_to_hand(piece)
+		hand_updated.emit.call_deferred(players[1].hand)
+		call_deferred("update_all_hand_counts")
+		print(players[current_player_id].hand)
+		bot_action_message.emit("Você comprou a peça [%d,%d]" % [piece.a, piece.b])
+	else:
+		bot_action_message.emit("Não há peças para comprar.")

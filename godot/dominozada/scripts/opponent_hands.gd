@@ -34,10 +34,6 @@ func _on_game_started():
 	if all_players.size() > 2: 
 		ui_map[all_players[2]] = right_hand
 		_update_opponent_label(right_hand, all_players[2])
-	
-	top_hand.set_piece_count(7, "up")
-	left_hand.set_piece_count(7, "left")
-	right_hand.set_piece_count(7, "right")
 
 func _update_opponent_label(hand_node: Node, player_id: int):
 	"""Atualiza o label do oponente com o nome do jogador"""

@@ -8,8 +8,10 @@ extends CanvasLayer
 @onready var winner_label := $MainContainer/GameOverPanel/GameOverContent/WinnerLabel
 @onready var reason_label := $MainContainer/GameOverPanel/GameOverContent/ReasonLabel
 @onready var new_game_button := $MainContainer/GameOverPanel/GameOverContent/NewGameButton if has_node("MainContainer/GameOverPanel/GameOverContent/NewGameButton") else null
+@onready var buy_button := $MainContainer/ActionButtons/BuyButton
 
 var game_manager: Node
+var domino_set: RefCounted
 
 func _ready():
 	# Conectar ao GameManager apropriado baseado no modo
@@ -18,6 +20,7 @@ func _ready():
 	else:
 		# Tentar diferentes caminhos para encontrar o GameManager offline
 		game_manager = get_node("/root/Board/GameManager") if has_node("/root/Board/GameManager") else null
+		domino_set = game_manager.domino_set
 		if not game_manager:
 			game_manager = get_node("/root/GameManager") if has_node("/root/GameManager") else null
 	
@@ -34,6 +37,7 @@ func _ready():
 			game_manager.bot_action_message.connect(_on_bot_action_message)
 	
 	# Conectar botões
+	buy_button.pressed.connect(_on_buy_button_pressed)
 	pass_button.pressed.connect(_on_pass_button_pressed)
 	if start_button:
 		start_button.pressed.connect(_on_start_button_pressed)
@@ -47,6 +51,7 @@ func _ready():
 	# Configurar estado inicial
 	game_over_panel.visible = false
 	pass_button.visible = false
+	buy_button.visible = false
 	turn_label.text = "Aguardando início do jogo..."
 	
 	# Configurar botões baseado no modo
@@ -64,6 +69,8 @@ func _on_turn_changed(player_id: int):
 		
 	if player_id == my_id:
 		turn_label.text = "É a sua vez!"
+		buy_button.visible = true
+		buy_button.disabled = false
 		pass_button.disabled = false
 		pass_button.visible = true
 	else:
@@ -86,6 +93,8 @@ func _on_turn_changed(player_id: int):
 		turn_label.text = "Vez de: " + player_name
 		pass_button.disabled = true
 		pass_button.visible = true
+		buy_button.visible = true
+		buy_button.disabled = true
 
 func _on_game_over(winner_id: int, reason: String):
 	"""Mostra tela de game over - compatível com ambos os modos"""
@@ -120,6 +129,7 @@ func _on_game_over(winner_id: int, reason: String):
 	reason_label.text = reason
 	game_over_panel.visible = true
 	pass_button.visible = false
+	buy_button.visible = false
 	
 	# print("DEBUG GAME_UI: Game over configurado - Winner: '%s', Reason: '%s'" % [winner_label.text, reason_label.text])
 	
@@ -190,6 +200,11 @@ func _on_new_game_button_pressed():
 			if has_node("MainContainer"):
 				$MainContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
+func _on_buy_button_pressed():
+	"""Jogador humano compra uma peça do boneyard"""
+	if game_manager and game_manager.is_human_turn():
+		game_manager.buy_piece()
+
 func update_ui_state():
 	"""Atualiza estado geral da UI - apenas modo offline"""
 	if NetworkManager.is_online_mode:
@@ -204,6 +219,7 @@ func update_ui_state():
 			if start_button:
 				start_button.visible = true
 			pass_button.visible = false
+			buy_button.visible = false
 			game_over_panel.visible = false
 			turn_label.text = "Pressione Iniciar Jogo"
 			# No menu, permitir inputs passarem através
@@ -214,12 +230,14 @@ func update_ui_state():
 			if start_button:
 				start_button.visible = false
 			pass_button.visible = game_manager.is_human_turn() if game_manager.has_method("is_human_turn") else true
+			buy_button.visible = game_manager.is_human_turn() if game_manager.has_method("is_human_turn") else true
 			game_over_panel.visible = false
 			# Durante o jogo, permitir inputs passarem através
 			if has_node("MainContainer"):
 				$MainContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			
 		2:  # GAME_OVER
+			buy_button.visible = false
 			pass_button.visible = false
 			game_over_panel.visible = true
 			# No game over, interceptar inputs para modal
