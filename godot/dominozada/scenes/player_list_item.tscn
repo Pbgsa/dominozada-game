@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://f4jlr5bm2a5k"]
+
+[ext_resource type="Script" uid="uid://b7eme6q6xq5j1" path="res://scripts/player_list_item.gd" id="1_rc3n7"]
+
+[node name="HBoxContainer" type="HBoxContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_rc3n7")
+
+[node name="PlayerNameLabel" type="Label" parent="."]
+layout_mode = 2
+
+[node name="ReadyCheckBox" type="CheckBox" parent="."]
+layout_mode = 2
+text = "Pronto"
