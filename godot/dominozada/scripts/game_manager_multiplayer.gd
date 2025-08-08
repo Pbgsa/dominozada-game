@@ -91,6 +91,9 @@ func _start_actual_game():
 	turn_order.push_front(1)
 	turn_order.shuffle()
 	
+	# --- CORREÇÃO 1: Enviar a ordem dos turnos para todos os clientes ---
+	rpc("client_set_turn_order", turn_order)
+	
 	# print("DEBUG MULTIPLAYER: turn_order configurado: %s" % turn_order)
 	# print("DEBUG MULTIPLAYER: Jogadores no NetworkManager: %s" % NetworkManager.players)
 	
@@ -117,19 +120,21 @@ func _start_actual_game():
 	
 		# print("DEBUG MULTIPLAYER: Distribuídas %d peças para jogador %d (%s)" % [players[peer_id].hand.size(), peer_id, NetworkManager.get_player_name(peer_id)])
 	
-	# Atualizar contadores de peças
+	# --- CORREÇÃO 2: Mudar a ordem das chamadas RPC ---
+	# Primeiro, iniciar o jogo em todos os clientes
+	rpc("client_start_game")
+	
+	# Depois, atualizar os contadores de peças de cada um
 	for peer_id in turn_order:
 		rpc("client_update_player_hand_count", peer_id, initial_head_number)
 	
-	# Inicializar estado do jogo
-	passes_in_a_row = 0
-	current_turn_index = 0
-	
-	# print("DEBUG MULTIPLAYER: Estado inicial - current_turn_index: %d, primeiro jogador: %d (%s)" % [current_turn_index, turn_order[current_turn_index], NetworkManager.get_player_name(turn_order[current_turn_index])])
-	
-	# Iniciar jogo e definir primeiro turno
-	rpc("client_start_game")
-	_set_turn(turn_order[current_turn_index])
+	# Por último, definir de quem é o primeiro turno
+	_set_turn(turn_order[current_turn_index]) 
+
+@rpc("authority", "call_local", "reliable")
+func client_set_turn_order(p_turn_order: Array):
+	"""Recebe e define a ordem dos turnos vinda do servidor."""
+	turn_order = p_turn_order
 
 @rpc("any_peer", "call_local", "reliable")
 func server_play_piece(piece_data: Dictionary, side: String):
