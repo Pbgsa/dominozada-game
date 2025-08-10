@@ -229,8 +229,7 @@ func _on_buy_button_pressed():
 func _on_report_button_pressed():
 	"""Denuncia jogada inválida"""
 	if NetworkManager.is_online_mode:
-		# ainda não implementado no multiplayer
-		print("vsf")
+		game_manager.server_report_invalid_move.rpc()
 	else:
 		if game_manager:
 			game_manager.report_invalid_move()
