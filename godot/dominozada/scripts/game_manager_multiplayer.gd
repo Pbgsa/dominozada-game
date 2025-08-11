@@ -215,10 +215,13 @@ func server_play_piece(piece_data: Dictionary, side: String):
 	passes_in_a_row = 0
 	
 	if player_hand.is_empty():
-		var winner_name = NetworkManager.get_player_name(sender_id)
-		var reason = "%s venceu! Ficou sem peças." % winner_name
-		# print("DEBUG MULTIPLAYER: Jogo terminado - %s" % reason)
-		rpc("client_game_over", sender_id, reason)
+		await get_tree().create_timer(3.0).timeout
+		if player_hand.is_empty():
+			var winner_name = NetworkManager.get_player_name(sender_id)
+			var reason = "%s venceu! Ficou sem peças." % winner_name
+			# print("DEBUG MULTIPLAYER: Jogo terminado - %s" % reason)
+			rpc("client_game_over", sender_id, reason)
+		_next_turn()
 	else:
 		_next_turn()
 
