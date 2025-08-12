@@ -199,6 +199,7 @@ func play_piece(piece_data: Dictionary, side: String):
 				report_invalid_move()
 			if not players[1].hand.is_empty():
 				_next_turn()
+				return
 		end_game(1, GameOverReason.EMPTY_HAND)
 	else:
 		_next_turn()
@@ -464,7 +465,7 @@ func execute_bot_turn():
 	
 	# Se não encontrou jogada, passa
 	if not move_found:
-		if GameMode.GATO_COM_LEBRE == current_mode and randf() < 1: #debug
+		if GameMode.GATO_COM_LEBRE == current_mode and randf() < 0.3: # 30% chance de fazer jogada inválida
 			var chosen_side = "left" if randf() < 0.5 else "right"
 
 			var piece_to_play = bot_hand[0]
@@ -486,6 +487,8 @@ func execute_bot_turn():
 			consecutive_passes = 0
 
 			print("DEBUG: Jogada na sacanagem: ", piece_to_play, chosen_side)
+			_next_turn()
+			return
 
 		if GameMode.PUXANDO_DO_MORTO == current_mode:
 			while domino_set.get_remaining_count() > 0:
@@ -572,7 +575,7 @@ func buy_piece():
 
 func report_invalid_move():
 	"""Tenta reportar a última jogada inválida"""
-	if randf() > 1 and not is_human_turn(): #Debugggggg
+	if randf() > 0.7 and not is_human_turn(): # 30% chance de reportar quando não é turno humano
 		return
 	else:
 		if not last_invalid_move.is_empty():

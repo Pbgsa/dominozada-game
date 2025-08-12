@@ -360,7 +360,7 @@ func server_report_invalid_move():
 	if not last_invalid_move.is_empty():
 
 		var piece = last_invalid_move.piece
-		var side = last_invalid_move.side
+		var _side = last_invalid_move.side
 		var player_id = last_invalid_move.player_id
 
 		# Remover a peça do board
