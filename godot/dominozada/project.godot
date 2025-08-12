@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 NetworkManager="*res://scripts/NetworkManager.gd"
 GameManagerMultiplayer="*res://scripts/game_manager_multiplayer.gd"
+MusicManager="*res://scripts/MusicManager.gd"
 
 [display]
 
