@@ -216,7 +216,7 @@ func _on_new_game_button_pressed():
 	if NetworkManager.is_online_mode:
 		# No multiplayer, apenas o host pode iniciar um novo jogo
 		if multiplayer.is_server():
-			game_manager.host_requests_start_game()
+			game_manager._start_actual_game()
 	else:
 		if game_manager:
 			game_manager.start_new_game()
