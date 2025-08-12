@@ -19,6 +19,7 @@ signal piece_distributed
 signal player_passed(player_id: int)
 signal piece_played(player_id: int, piece: Dictionary)
 signal bot_action_message(message: String)
+signal remove_piece_from_board(last_invalid_move: Dictionary)
 
 enum GameState {
 	MENU,
@@ -34,7 +35,8 @@ enum GameOverReason {
 
 enum GameMode {
 	CLASSICO,
-	PUXANDO_DO_MORTO
+	PUXANDO_DO_MORTO,
+	GATO_COM_LEBRE
 }
 
 var current_state: GameState = GameState.MENU
@@ -54,6 +56,8 @@ var players_count: int = 4
 var passes_in_a_row := 0
 var consecutive_passes: int = 0
 var board: Node
+var last_invalid_move: Dictionary = {}  # { player_id, piece, side, round }
+var current_round: int = 0
 
 func _ready():
 	# Inicializar componentes do jogo
@@ -110,7 +114,7 @@ func start_new_game():
 	"""Inicia uma nova partida"""
 	print("Iniciando novo jogo...")
 	current_state = GameState.PLAYING
-	current_mode = GameMode.CLASSICO
+	current_mode = GameMode.GATO_COM_LEBRE
 	current_turn_index = 0
 	consecutive_passes = 0
 	passes_in_a_row = 0
@@ -174,16 +178,24 @@ func play_piece(piece_data: Dictionary, side: String):
 	"""Versão simplificada para compatibilidade com sistema atual"""
 	if(current_turn_index > 0): return
 	var valid_sides = get_valid_sides_for_piece(piece_data)
-	if not side in valid_sides: return
+
+	if current_mode == GameMode.GATO_COM_LEBRE:
+		if not side in valid_sides:
+			last_invalid_move = {
+				"player_id": 1,
+				"piece": piece_data,
+				"side": side,
+				"round": current_round
+			}
+	elif not side in valid_sides:
+		return
 	
 	for i in range(players[1].hand.size()):
 		var p = players[1].hand[i]
 		if p.a == piece_data.a and p.b == piece_data.b:
 			players[1].hand.remove_at(i)
 			break
-			
-	# O board é responsável por atualizar seu próprio estado
-	# _update_board_state(piece_data, side) - REMOVIDO
+	
 	piece_played_on_board.emit(piece_data, side, 1)
 	piece_played.emit(1, piece_data)
 	player_hand_count_changed.emit(1, players[1].hand.size())
@@ -191,6 +203,12 @@ func play_piece(piece_data: Dictionary, side: String):
 	consecutive_passes = 0
 	
 	if players[1].hand.is_empty():
+		if current_mode == GameMode.GATO_COM_LEBRE:
+			#roda 3 vezes
+			for i in range(3):
+				report_invalid_move()
+			if not players[1].hand.is_empty():
+				_next_turn()
 		end_game(1, GameOverReason.EMPTY_HAND)
 	else:
 		_next_turn()
@@ -216,7 +234,16 @@ func play_piece_advanced(player_id: int, piece: Dictionary, side: String) -> boo
 	
 	# Validar jogada
 	var valid_sides = get_valid_sides_for_piece(piece)
-	if not side in valid_sides:
+
+	if current_mode == GameMode.GATO_COM_LEBRE:
+		if not side in valid_sides:
+			last_invalid_move = {
+				"player_id": 1,
+				"piece": piece,
+				"side": side,
+				"round": current_round
+			}
+	elif not side in valid_sides:
 		print("Jogada rejeitada: peça não pode ser colocada no lado especificado")
 		return false
 	
@@ -237,12 +264,18 @@ func play_piece_advanced(player_id: int, piece: Dictionary, side: String) -> boo
 	
 	# Verificar vitória
 	if player_dict.hand.is_empty():
+		if current_mode == GameMode.GATO_COM_LEBRE:
+			#roda 3 vezes
+			for i in range(3):
+				report_invalid_move()
+			if not players[1].hand.is_empty():
+				_next_turn()
+				return true
 		end_game(player_id, GameOverReason.EMPTY_HAND)
 		return true
-	
-	# Próximo turno
-	_next_turn()
-	return true
+	else:
+		_next_turn()
+		return true
 
 func get_valid_sides_for_piece(piece_data: Dictionary) -> Array[String]:
 	var valid_sides: Array[String] = []
@@ -388,6 +421,9 @@ func find_first_player() -> int:
 
 func _next_turn():
 	current_turn_index = (current_turn_index + 1) % turn_order.size()
+	current_round += 1
+	if not last_invalid_move.is_empty() and last_invalid_move.round + 1 < current_round:
+		last_invalid_move.clear()  # Limpar jogada inválida se for de rodada anterior
 	var current_player_id = turn_order[current_turn_index]
 	turn_changed.emit(current_player_id)
 	
@@ -407,6 +443,8 @@ func execute_bot_turn():
 	if current_state != GameState.PLAYING:
 		return
 	
+	report_invalid_move()
+
 	# Tentar encontrar uma jogada válida
 	var bot_hand = bot_data.hand
 	var move_found = false
@@ -420,8 +458,6 @@ func execute_bot_turn():
 			var side_text = "esquerda" if side_to_play == "left" else "direita"
 			bot_action_message.emit("%s jogou na %s" % [bot_data.name, side_text])
 			
-			# O board é responsável por atualizar seu próprio estado
-			# _update_board_state(piece, side_to_play) - REMOVIDO
 			piece_played_on_board.emit(piece, side_to_play, current_player_id)
 			piece_played.emit(current_player_id, piece)
 			bot_hand.erase(piece)
@@ -438,6 +474,29 @@ func execute_bot_turn():
 	
 	# Se não encontrou jogada, passa
 	if not move_found:
+		if GameMode.GATO_COM_LEBRE == current_mode and randf() < 1: #debug
+			var chosen_side = "left" if randf() < 0.5 else "right"
+
+			var piece_to_play = bot_hand[0]
+			var side_text = "esquerda" if chosen_side == "left" else "direita"
+			bot_action_message.emit("%s jogou na %s" % [bot_data.name, side_text])
+			
+			last_invalid_move = {
+				"player_id": current_player_id,
+				"piece": piece_to_play,
+				"side": chosen_side,
+				"round": current_round
+			}
+
+			piece_played_on_board.emit(piece_to_play, chosen_side, current_player_id)
+			piece_played.emit(current_player_id, piece_to_play)
+			bot_hand.erase(piece_to_play)
+			player_hand_count_changed.emit(current_player_id, bot_hand.size())
+			passes_in_a_row = 0
+			consecutive_passes = 0
+
+			print("DEBUG: Jogada na sacanagem: ", piece_to_play, chosen_side)
+
 		if GameMode.PUXANDO_DO_MORTO == current_mode:
 			while domino_set.get_remaining_count() > 0:
 				var piece = domino_set.draw_piece()
@@ -456,7 +515,6 @@ func execute_bot_turn():
 						player_hand_count_changed.emit(current_player_id, bot_hand.size())
 						passes_in_a_row = 0
 						consecutive_passes = 0
-						move_found = true
 						_next_turn()
 						return
 					else:
@@ -521,3 +579,30 @@ func buy_piece():
 		bot_action_message.emit("Você comprou a peça [%d,%d]" % [piece.a, piece.b])
 	else:
 		bot_action_message.emit("Não há peças para comprar.")
+
+func report_invalid_move():
+	"""Tenta reportar a última jogada inválida"""
+	if randf() > 1 and not is_human_turn(): #Debugggggg
+		return
+	else:
+		if not last_invalid_move.is_empty():
+			bot_action_message.emit("Jogada inválida detectada: %s" % last_invalid_move)
+
+			var piece = last_invalid_move.piece
+			var side = last_invalid_move.side
+			var player_id = last_invalid_move.player_id
+
+			# Remover a peça do board
+			remove_piece_from_board.emit(last_invalid_move)
+
+			# Adicionar a peça de volta à mão do jogador
+			players[player_id].hand.append(piece)
+			add_a_purchased_piece_to_bot(piece)
+			hand_updated.emit.call_deferred(players[1].hand)
+			call_deferred("update_all_hand_counts")
+			bot_action_message.emit("A peça [%d,%d] foi devolvida à mão do jogador %d" % [piece.a, piece.b, player_id])
+
+			last_invalid_move.clear()
+
+func is_board_empty() -> bool:
+	return board.board_left_value == -1 and board.board_right_value == -1

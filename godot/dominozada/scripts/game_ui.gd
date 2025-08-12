@@ -9,9 +9,16 @@ extends CanvasLayer
 @onready var reason_label := $MainContainer/GameOverPanel/GameOverContent/ReasonLabel
 @onready var new_game_button := $MainContainer/GameOverPanel/GameOverContent/NewGameButton if has_node("MainContainer/GameOverPanel/GameOverContent/NewGameButton") else null
 @onready var buy_button := $MainContainer/ActionButtons/BuyButton
+@onready var report_button := $MainContainer/ActionButtons/ReportButton
 
 var game_manager: Node
 var domino_set: RefCounted
+
+enum GameMode {
+	CLASSICO,
+	PUXANDO_DO_MORTO,
+	GATO_COM_LEBRE
+}
 
 func _ready():
 	# Conectar ao GameManager apropriado baseado no modo
@@ -38,6 +45,7 @@ func _ready():
 	
 	# Conectar botões
 	buy_button.pressed.connect(_on_buy_button_pressed)
+	report_button.pressed.connect(_on_report_button_pressed)
 	pass_button.pressed.connect(_on_pass_button_pressed)
 	if start_button:
 		start_button.pressed.connect(_on_start_button_pressed)
@@ -52,6 +60,7 @@ func _ready():
 	game_over_panel.visible = false
 	pass_button.visible = false
 	buy_button.visible = false
+	report_button.visible = false
 	turn_label.text = "Aguardando início do jogo..."
 	
 	# Configurar botões baseado no modo
@@ -69,8 +78,12 @@ func _on_turn_changed(player_id: int):
 		
 	if player_id == my_id:
 		turn_label.text = "É a sua vez!"
-		buy_button.visible = true
-		buy_button.disabled = false
+		if game_manager.current_mode == GameMode.PUXANDO_DO_MORTO:
+			buy_button.visible = true
+			buy_button.disabled = false
+		elif game_manager.current_mode == GameMode.GATO_COM_LEBRE:
+			report_button.visible = true
+			report_button.disabled = false
 		pass_button.disabled = false
 		pass_button.visible = true
 	else:
@@ -93,8 +106,12 @@ func _on_turn_changed(player_id: int):
 		turn_label.text = "Vez de: " + player_name
 		pass_button.disabled = true
 		pass_button.visible = true
-		buy_button.visible = true
-		buy_button.disabled = true
+		if game_manager.current_mode == GameMode.PUXANDO_DO_MORTO:
+			buy_button.visible = true
+			buy_button.disabled = true
+		elif game_manager.current_mode == GameMode.GATO_COM_LEBRE:
+			report_button.visible = true
+			report_button.disabled = false
 
 func _on_game_over(winner_id: int, reason: String):
 	"""Mostra tela de game over - compatível com ambos os modos"""
@@ -130,7 +147,8 @@ func _on_game_over(winner_id: int, reason: String):
 	game_over_panel.visible = true
 	pass_button.visible = false
 	buy_button.visible = false
-	
+	report_button.visible = false
+
 	# print("DEBUG GAME_UI: Game over configurado - Winner: '%s', Reason: '%s'" % [winner_label.text, reason_label.text])
 	
 	# Quando game over está visível, interceptar inputs para modal
@@ -208,6 +226,14 @@ func _on_buy_button_pressed():
 		if game_manager and game_manager.is_human_turn():
 			game_manager.buy_piece()
 
+func _on_report_button_pressed():
+	"""Denuncia jogada inválida"""
+	if NetworkManager.is_online_mode:
+		game_manager.server_report_invalid_move.rpc()
+	else:
+		if game_manager:
+			game_manager.report_invalid_move()
+
 func update_ui_state():
 	"""Atualiza estado geral da UI - apenas modo offline"""
 	if NetworkManager.is_online_mode:
@@ -223,6 +249,7 @@ func update_ui_state():
 				start_button.visible = true
 			pass_button.visible = false
 			buy_button.visible = false
+			report_button.visible = false
 			game_over_panel.visible = false
 			turn_label.text = "Pressione Iniciar Jogo"
 			# No menu, permitir inputs passarem através
@@ -233,7 +260,10 @@ func update_ui_state():
 			if start_button:
 				start_button.visible = false
 			pass_button.visible = game_manager.is_human_turn() if game_manager.has_method("is_human_turn") else true
-			buy_button.visible = game_manager.is_human_turn() if game_manager.has_method("is_human_turn") else true
+			if game_manager.current_mode == GameMode.PUXANDO_DO_MORTO:
+				buy_button.visible = game_manager.is_human_turn() if game_manager.has_method("is_human_turn") else true
+			if game_manager.current_mode == GameMode.GATO_COM_LEBRE:
+				report_button.visible = true
 			game_over_panel.visible = false
 			# Durante o jogo, permitir inputs passarem através
 			if has_node("MainContainer"):
@@ -241,6 +271,7 @@ func update_ui_state():
 			
 		2:  # GAME_OVER
 			buy_button.visible = false
+			report_button.visible = false
 			pass_button.visible = false
 			game_over_panel.visible = true
 			# No game over, interceptar inputs para modal

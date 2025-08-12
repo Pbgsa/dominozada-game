@@ -26,14 +26,14 @@ func _on_game_started():
 	all_players.erase(my_id)
 	
 	if all_players.size() > 0: 
-		ui_map[all_players[0]] = top_hand
-		_update_opponent_label(top_hand, all_players[0])
+		ui_map[all_players[0]] = right_hand
+		_update_opponent_label(right_hand, all_players[0])
 	if all_players.size() > 1: 
-		ui_map[all_players[1]] = left_hand  
-		_update_opponent_label(left_hand, all_players[1])
+		ui_map[all_players[1]] = top_hand
+		_update_opponent_label(top_hand, all_players[1])
 	if all_players.size() > 2: 
-		ui_map[all_players[2]] = right_hand
-		_update_opponent_label(right_hand, all_players[2])
+		ui_map[all_players[2]] = left_hand
+		_update_opponent_label(left_hand, all_players[2])
 
 func _update_opponent_label(hand_node: Node, player_id: int):
 	"""Atualiza o label do oponente com o nome do jogador"""
