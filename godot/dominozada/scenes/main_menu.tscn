@@ -156,7 +156,7 @@ text = "Voltar"
 [connection signal="pressed" from="CenterContainer/OfflineView/BotaoModoPuxandoMorto" to="." method="_on_botao_puxando_morto_offline_pressed"]
 [connection signal="mouse_entered" from="CenterContainer/OfflineView/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_mouse_entered"]
 [connection signal="mouse_exited" from="CenterContainer/OfflineView/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_mouse_exited"]
-[connection signal="pressed" from="CenterContainer/OfflineView/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_pressed"]
+[connection signal="pressed" from="CenterContainer/OfflineView/BotaoModoGatoComLebre" to="." method="_on_botao_gato_lebre_offline_pressed"]
 [connection signal="mouse_entered" from="CenterContainer/OfflineView/BotaoVoltarOffline" to="." method="_on_botao_modo_gato_com_lebre_mouse_entered"]
 [connection signal="mouse_exited" from="CenterContainer/OfflineView/BotaoVoltarOffline" to="." method="_on_botao_modo_gato_com_lebre_mouse_exited"]
 [connection signal="pressed" from="CenterContainer/OfflineView/BotaoVoltarOffline" to="." method="_on_botao_voltar_de_offline_pressed"]

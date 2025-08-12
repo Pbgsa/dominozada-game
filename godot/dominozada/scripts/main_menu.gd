@@ -66,10 +66,10 @@ func _on_botao_classico_offline_pressed():
 
 func _on_botao_puxando_morto_offline_pressed():
 	GameManager.set_next_game_mode(GameManager.GameMode.PUXANDO_DO_MORTO)
-	print("MENU: Modo de jogo definido para: ", GameManager.GameMode.keys()[GameManager.GameMode.PUXANDO_DO_MORTO])
 	go_to_board()
 
 func _on_botao_gato_lebre_offline_pressed():
+	GameManager.set_next_game_mode(GameManager.GameMode.GATO_COM_LEBRE)
 	go_to_board()
 
 func _on_botao_voltar_de_offline_pressed():
