@@ -2,7 +2,7 @@
 extends Control
 
 @onready var played_pieces_container := $GameArea/PlayedPieces
-@onready var offline_game_manager = $GameManager
+#@onready var offline_game_manager = $GameManager
 @export var domino_piece_scene: PackedScene = preload("res://scenes/domino_piece.tscn")
 
 var visual_pieces: Array[Node2D] = []
@@ -22,15 +22,42 @@ signal board_state_changed(left_value: int, right_value: int, is_empty: bool)
 # --------------------------------------------------------------------
 
 func _ready():
+	print("BOARD: Iniciando board.gd")
+	print("BOARD: NetworkManager.is_online_mode = ", NetworkManager.is_online_mode)
+	
+	# Primeiro, o board se registra no GameManager
+	GameManager.register_board(self)
+	print("BOARD: Board registrado no GameManager")
+
 	var game_manager
 	if NetworkManager.is_online_mode:
+		print("BOARD: Usando GameManagerMultiplayer")
 		game_manager = GameManagerMultiplayer
 		game_manager.server_player_is_ready.rpc()
 	else:
-		game_manager = offline_game_manager
-
+		print("BOARD: Usando GameManager offline")
+		# Agora que o board já se registrou, podemos continuar com segurança
+		game_manager = GameManager
+		
+	# Conecta os sinais como antes
+	print("BOARD: Conectando sinais")
 	game_manager.game_started.connect(clear_board)
 	game_manager.piece_played_on_board.connect(_on_piece_played_on_board)
+	
+	# Inicia o jogo apenas no modo offline, após conectar os sinais
+	# Usar call_deferred para garantir que tudo esteja inicializado
+	if not NetworkManager.is_online_mode:
+		print("BOARD: Agendando início do jogo offline")
+		call_deferred("start_offline_game")
+
+func start_offline_game():
+	"""Inicia o jogo offline após garantir que tudo está inicializado"""
+	print("BOARD: Iniciando jogo offline")
+	if GameManager and GameManager.has_method("start_new_game"):
+		print("BOARD: Chamando GameManager.start_new_game()")
+		GameManager.start_new_game()
+	else:
+		print("ERRO: GameManager não encontrado ou método start_new_game não disponível")
 
 # --- CORREÇÃO: Função de posicionamento de peças reescrita ---
 func _on_piece_played_on_board(piece_data: Dictionary, side: String, _player_id: int):

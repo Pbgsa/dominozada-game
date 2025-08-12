@@ -18,11 +18,9 @@ func _ready():
 	if NetworkManager.is_online_mode:
 		game_manager = GameManagerMultiplayer
 	else:
-		# Tentar diferentes caminhos para encontrar o GameManager offline
-		game_manager = get_node("/root/Board/GameManager") if has_node("/root/Board/GameManager") else null
+		# Usar o GameManager global
+		game_manager = GameManager
 		domino_set = game_manager.domino_set
-		if not game_manager:
-			game_manager = get_node("/root/GameManager") if has_node("/root/GameManager") else null
 	
 	if game_manager:
 		# Conectar sinais comuns a ambos os modos

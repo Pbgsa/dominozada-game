@@ -61,7 +61,6 @@ size_flags_horizontal = 4
 text = "Sair do jogo"
 
 [node name="OfflineView" type="VBoxContainer" parent="CenterContainer"]
-visible = false
 layout_mode = 2
 
 [node name="Label" type="Label" parent="CenterContainer/OfflineView"]
@@ -153,7 +152,7 @@ text = "Voltar"
 [connection signal="pressed" from="CenterContainer/OfflineView/BotaoModoClassico" to="." method="_on_botao_classico_offline_pressed"]
 [connection signal="mouse_entered" from="CenterContainer/OfflineView/BotaoModoPuxandoMorto" to="." method="_on_botao_modo_burrinho_mouse_entered"]
 [connection signal="mouse_exited" from="CenterContainer/OfflineView/BotaoModoPuxandoMorto" to="." method="_on_botao_modo_burrinho_mouse_exited"]
-[connection signal="pressed" from="CenterContainer/OfflineView/BotaoModoPuxandoMorto" to="." method="_on_botao_puxando_morto_offline_pressed"]
+[connection signal="pressed" from="CenterContainer/OfflineView/BotaoModoPuxandoMorto" to="." method="_on_botao_modo_burrinho_pressed"]
 [connection signal="mouse_entered" from="CenterContainer/OfflineView/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_mouse_entered"]
 [connection signal="mouse_exited" from="CenterContainer/OfflineView/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_mouse_exited"]
 [connection signal="pressed" from="CenterContainer/OfflineView/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_pressed"]

@@ -54,16 +54,23 @@ func _on_botao_offline_pressed():
 func _on_botao_sair_pressed():
 	get_tree().quit()
 
-
+func go_to_board():
+	# Garantir que estamos no modo offline antes de ir para o board
+	NetworkManager.is_online_mode = false
+	print("MENU: Definindo modo offline, is_online_mode = ", NetworkManager.is_online_mode)
+	get_tree().change_scene_to_file("res://scenes/board.tscn")
 # --- SINAIS DA TELA OFFLINE (OfflineView) ---
 func _on_botao_classico_offline_pressed():
-	get_tree().change_scene_to_file("res://scenes/board.tscn")
+	GameManager.set_next_game_mode(GameManager.GameMode.CLASSICO)
+	go_to_board()
 
-func _on_botao_burrinho_offline_pressed():
-	get_tree().change_scene_to_file("res://caminho/para/modo_burrinho.tscn")
+func _on_botao_puxando_morto_offline_pressed():
+	GameManager.set_next_game_mode(GameManager.GameMode.PUXANDO_DO_MORTO)
+	print("MENU: Modo de jogo definido para: ", GameManager.GameMode.keys()[GameManager.GameMode.PUXANDO_DO_MORTO])
+	go_to_board()
 
 func _on_botao_gato_lebre_offline_pressed():
-	get_tree().change_scene_to_file("res://caminho/para/modo_gato_lebre.tscn")
+	go_to_board()
 
 func _on_botao_voltar_de_offline_pressed():
 	show_main_view()

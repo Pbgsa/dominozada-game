@@ -19,7 +19,7 @@ func _ready():
 	if NetworkManager.is_online_mode:
 		game_manager = GameManagerMultiplayer
 	else:
-		game_manager = get_node("/root/Board/GameManager")
+		game_manager = GameManager  # Usar o GameManager global
 
 	# Conectar sinais
 	game_manager.hand_updated.connect(_on_hand_updated)

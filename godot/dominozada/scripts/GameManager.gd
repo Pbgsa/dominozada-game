@@ -56,34 +56,21 @@ var consecutive_passes: int = 0
 var board: Node
 
 func _ready():
-	# Inicializar componentes do jogo
 	domino_set = DominoSetScript.new()
 	setup_players()
 	
-	# Aguardar um frame para garantir que a cena esteja carregada
-	await get_tree().process_frame
-	
-	# Obter referência ao board - PRIORIDADE para encontrar o board correto
-	board = get_tree().current_scene if get_tree().current_scene.has_method("get_board_left_value") else null
-	
-	if not board:
-		# Tentar encontrar o board na cena atual
-		var scene_root = get_tree().current_scene
-		for child in scene_root.get_children():
-			if child.has_method("get_board_left_value"):
-				board = child
-				print("Board encontrado:", child.name)
-				break
-	
-	if board:
-		print("Board encontrado com sucesso!")
-		# Conectar ao sinal de mudança de estado do board
-		if board.has_signal("board_state_changed"):
-			board.board_state_changed.connect(_on_board_state_changed)
+func register_board(board_node: Node):
+	if is_instance_valid(board_node) and board_node.has_method("get_board_left_value"):
+		self.board = board_node
+		print("GameManager: Board registrado com sucesso!")
+
+		# Movemos a conexão do sinal para cá, garantindo que ela só aconteça quando o board existe.
+		if self.board.has_signal("board_state_changed"):
+			if not self.board.board_state_changed.is_connected(_on_board_state_changed):
+				self.board.board_state_changed.connect(_on_board_state_changed)
 	else:
-		print("AVISO: Board não encontrado - algumas funcionalidades podem não funcionar")
-	
-	start_new_game()
+		self.board = null
+		print("GameManager ERRO: Tentativa de registrar um board inválido.")
 
 func _on_board_state_changed(left_value: int, right_value: int, is_empty: bool):
 	"""Callback quando o estado do board muda"""
@@ -106,11 +93,14 @@ func setup_players():
 		bot.player_name = "Bot " + str(i - 1)
 		players_objects.append(bot)
 
+func set_next_game_mode(mode: GameMode):
+	current_mode = mode
+
 func start_new_game():
 	"""Inicia uma nova partida"""
 	print("Iniciando novo jogo...")
+	print("Iniciando novo jogo no modo: ", GameMode.keys()[current_mode])
 	current_state = GameState.PLAYING
-	current_mode = GameMode.CLASSICO
 	current_turn_index = 0
 	consecutive_passes = 0
 	passes_in_a_row = 0
