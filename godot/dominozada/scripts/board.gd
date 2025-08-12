@@ -16,6 +16,7 @@ var up_left_increment := 0
 var down_right_increment := 0
 var board_is_empty := true
 var pieces_sequence: Array[Dictionary] = []
+var game_manager
 
 # Sinal para notificar mudanças no estado do board
 signal board_state_changed(left_value: int, right_value: int, is_empty: bool)
@@ -43,6 +44,7 @@ func _ready():
 	print("BOARD: Conectando sinais")
 	game_manager.game_started.connect(clear_board)
 	game_manager.piece_played_on_board.connect(_on_piece_played_on_board)
+	game_manager.remove_piece_from_board.connect(_on_piece_removed_from_board)
 	
 	# Inicia o jogo apenas no modo offline, após conectar os sinais
 	# Usar call_deferred para garantir que tudo esteja inicializado
@@ -62,6 +64,9 @@ func start_offline_game():
 # --- CORREÇÃO: Função de posicionamento de peças reescrita ---
 func _on_piece_played_on_board(piece_data: Dictionary, side: String, _player_id: int):
 	add_piece_to_board(piece_data, side)
+
+func _on_piece_removed_from_board(last_invalid_move: Dictionary):
+	remove_piece(last_invalid_move)
 
 func add_piece_to_board(data: Dictionary, requested_side: String = ""):
 	var piece_a = data.a
@@ -104,6 +109,11 @@ func add_piece_to_board(data: Dictionary, requested_side: String = ""):
 				placed = true
 				actual_side = "left"
 				# print("DEBUG: Peça conectada na ESQUERDA (piece_b=%d == left_value). Nova esquerda: %d" % [piece_b, board_left_value])
+			elif game_manager.current_mode == 2:
+				pieces_sequence.push_front({"a": piece_b, "b": piece_a})
+				board_left_value = piece_b
+				placed = true
+				actual_side = "left"
 		
 		if not placed and (requested_side == "right" or requested_side.is_empty()):
 			# Try to connect on the right end
@@ -119,6 +129,11 @@ func add_piece_to_board(data: Dictionary, requested_side: String = ""):
 				placed = true
 				actual_side = "right"
 				# print("DEBUG: Peça conectada na DIREITA (piece_b=%d == right_value). Nova direita: %d" % [piece_b, board_right_value])
+			elif game_manager.current_mode == 2:
+				pieces_sequence.append({"a": piece_b, "b": piece_a})
+				board_right_value = piece_b
+				placed = true
+				actual_side = "right"
 		
 		if not placed:
 			# print("ERRO: Peça [%d,%d] não pôde ser conectada no lado '%s'! Esquerda: %d, Direita: %d" % [piece_a, piece_b, requested_side, board_left_value, board_right_value])
@@ -426,3 +441,60 @@ func clear_board():
 	up_left_increment = 0
 	down_right_increment = 0
 	board_is_empty = true
+
+func remove_piece(last_invalid_move: Dictionary): # { player_id, piece, side, round }
+	"""Remove uma peça do tabuleiro (usado para jogadas inválidas)"""
+	print("Tentando remover peça inválida do tabuleiro: ", last_invalid_move.piece)
+
+	if pieces_sequence.is_empty():
+		print("Erro: Não há peças no tabuleiro para remover.")
+		return
+
+	var invalid_piece_player_id = last_invalid_move["player_id"]
+	var invalid_piece = last_invalid_move["piece"]
+	var invalid_piece_side = last_invalid_move["side"]
+
+	remove_piece_from_a_side(invalid_piece, invalid_piece_side, invalid_piece_player_id)
+
+func remove_piece_from_a_side(piece: Dictionary, side: String, player_id: int):
+	"""Remove uma peça de um lado específico do tabuleiro"""
+
+	if side == "left":
+		var piece_L = pieces_sequence[0]
+		if (piece_L.a == piece.a and piece_L.b == piece.b) or (piece_L.a == piece.b and piece_L.b == piece.a):
+			played_pieces_container.remove_child(visual_pieces[0])
+			pieces_sequence.pop_front()
+			board_left_value = pieces_sequence[0].a
+			remove_visual_at_side("left")
+		else:
+			print("Erro: Peça não encontrada no lado esquerdo.")
+
+	elif side == "right":
+		var piece_R = pieces_sequence[pieces_sequence.size()-1]
+		if (piece_R.a == piece.a and piece_R.b == piece.b) or (piece_R.a == piece.b and piece_R.b == piece.a):
+			played_pieces_container.remove_child(visual_pieces[visual_pieces.size() - 1])
+			pieces_sequence.pop_back()
+			board_right_value = pieces_sequence[pieces_sequence.size()-1].b
+			remove_visual_at_side("right")
+		else:
+			print("Erro: Peça não encontrada no lado direito.")
+
+	else:
+		print("Erro: Lado inválido, deve ser 'left' ou 'right'")
+
+	update_head_positions()
+
+func remove_visual_at_side(side: String):
+	"""Remove a peça visual do lado especificado"""
+	if side == "left":
+		var leftmost_piece = visual_pieces[0]
+		var leftmost_position = leftmost_piece.position
+		if leftmost_position.x < -180 and up_left_increment > 0:
+			up_left_increment -= 1
+		visual_pieces.pop_front()
+	else:
+		var rightmost_piece = visual_pieces[visual_pieces.size() - 1]
+		var rightmost_position = rightmost_piece.position
+		if rightmost_position.x > 180 and down_right_increment > 0:
+			down_right_increment -= 1
+		visual_pieces.pop_back()

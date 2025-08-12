@@ -9,10 +9,12 @@ signal turn_changed(player_id)
 signal piece_played_on_board(piece_data, side, player_id)
 signal game_over(winner_id, reason)
 signal player_passed_turn(player_id)
+signal remove_piece_from_board(last_invalid_move: Dictionary)
 
 enum GameMode {
 	CLASSICO,
-	PUXANDO_DO_MORTO
+	PUXANDO_DO_MORTO,
+	GATO_COM_LEBRE
 }
 
 var domino_set = DominoSet.new()
@@ -22,8 +24,10 @@ var current_turn_index := 0
 # REMOVIDO: board_left_value, board_right_value, board_is_empty - usa o board como fonte da verdade
 var passes_in_a_row := 0
 var ready_players := []
-var current_mode: GameMode = GameMode.CLASSICO
+var current_mode: GameMode = GameMode.GATO_COM_LEBRE
 var board: Node  # Referência ao board
+var last_invalid_move: Dictionary = {}  # { player_id, piece, side, round }
+var current_round: int = 0
 
 func _ready():
 	# Aguardar um frame para garantir que a cena esteja carregada
@@ -80,7 +84,7 @@ func server_player_is_ready():
 
 func _start_actual_game():
 	# print("DEBUG MULTIPLAYER: Iniciando jogo...")
-	current_mode = GameMode.CLASSICO
+	current_mode = GameMode.GATO_COM_LEBRE
 	
 	# Garantir que temos o board antes de iniciar o jogo
 	if not board or not is_instance_valid(board):
@@ -172,7 +176,16 @@ func server_play_piece(piece_data: Dictionary, side: String):
 		return
 
 	var valid_sides = get_valid_sides_for_piece(piece_data)
-	if not side in valid_sides: 
+
+	if current_mode == GameMode.GATO_COM_LEBRE:
+		if not side in valid_sides:
+			last_invalid_move = {
+				"player_id": sender_id,
+				"piece": piece_data,
+				"side": side,
+				"round": current_round
+			}
+	elif not side in valid_sides: 
 		# print("DEBUG MULTIPLAYER: Lado inválido '%s' para peça [%d,%d]. Lados válidos: %s" % [side, piece_data.a, piece_data.b, valid_sides])
 		return
 
@@ -196,15 +209,19 @@ func server_play_piece(piece_data: Dictionary, side: String):
 	
 	# Executar jogada
 	# print("DEBUG MULTIPLAYER: Jogada válida executada por %s" % NetworkManager.get_player_name(sender_id))
+
 	rpc("client_play_piece", piece_data, side, sender_id)
 	rpc("client_update_player_hand_count", sender_id, player_hand.size())
 	passes_in_a_row = 0
 	
 	if player_hand.is_empty():
-		var winner_name = NetworkManager.get_player_name(sender_id)
-		var reason = "%s venceu! Ficou sem peças." % winner_name
-		# print("DEBUG MULTIPLAYER: Jogo terminado - %s" % reason)
-		rpc("client_game_over", sender_id, reason)
+		await get_tree().create_timer(3.0).timeout
+		if player_hand.is_empty():
+			var winner_name = NetworkManager.get_player_name(sender_id)
+			var reason = "%s venceu! Ficou sem peças." % winner_name
+			# print("DEBUG MULTIPLAYER: Jogo terminado - %s" % reason)
+			rpc("client_game_over", sender_id, reason)
+		_next_turn()
 	else:
 		_next_turn()
 
@@ -323,13 +340,50 @@ func server_buy_piece():
 	
 	# print("DEBUG MULTIPLAYER: Jogador %d comprou peça [%d,%d]" % [sender_id, piece.a, piece.b])
 
+@rpc("any_peer", "call_local", "reliable")
+func server_report_invalid_move():
+	# Verificar se o servidor está ativo
+	if not multiplayer.is_server():
+		return
+	
+	var sender_id = multiplayer.get_remote_sender_id()
+	if sender_id == 0: sender_id = 1
+
+	if turn_order.is_empty():
+		push_error("ERRO MULTIPLAYER: turn_order está vazio! Jogo não foi inicializado corretamente.")
+		return
+	
+	if current_turn_index < 0 or current_turn_index >= turn_order.size():
+		push_error("ERRO MULTIPLAYER: current_turn_index (%d) fora do range! turn_order.size(): %d" % [current_turn_index, turn_order.size()])
+		return
+
+	if not last_invalid_move.is_empty():
+
+		var piece = last_invalid_move.piece
+		var side = last_invalid_move.side
+		var player_id = last_invalid_move.player_id
+
+		# Remover a peça do board
+		rpc("client_remove_piece_from_board", last_invalid_move)
+
+		# Adicionar a peça de volta à mão do jogador
+		players[player_id].hand.append(piece)
+		rpc_id(player_id, "client_receive_hand", players[player_id].hand)
+		rpc("client_update_player_hand_count", player_id, players[player_id].hand.size())
+
+		last_invalid_move.clear()
+
 func _next_turn():
 	if turn_order.is_empty():
 		push_error("ERRO MULTIPLAYER: _next_turn chamado com turn_order vazio!")
 		return
-	
+
+	current_round += 1
 	current_turn_index = (current_turn_index + 1) % turn_order.size()
 	var next_player = turn_order[current_turn_index]
+
+	if not last_invalid_move.is_empty() and last_invalid_move.round + 1 < current_round:
+		last_invalid_move.clear()
 
 	# var player_name = NetworkManager.get_player_name(next_player)
 	# print("DEBUG MULTIPLAYER: Próximo turno - Index: %d, Jogador: %d (%s)" % [current_turn_index, next_player, player_name])
@@ -365,6 +419,9 @@ func calculate_winner_by_points() -> Dictionary:
 		"points": lowest_points
 	}
 
+func is_board_empty() -> bool:
+	return board.board_left_value == -1 and board.board_right_value == -1
+
 # func debug_game_state():
 # 	"""Função para debug do estado do jogo"""
 # 	print("=== DEBUG MULTIPLAYER - Estado do Jogo ===")
@@ -398,6 +455,9 @@ func client_set_turn(player_id: int):
 @rpc("authority", "call_local", "reliable")
 func client_play_piece(piece_data: Dictionary, side: String, player_id: int):
 	piece_played_on_board.emit(piece_data, side, player_id)
+@rpc("authority", "call_local", "reliable")
+func client_remove_piece_from_board(last_invalid_move_data: Dictionary):
+	remove_piece_from_board.emit(last_invalid_move_data)
 @rpc("authority", "call_local", "reliable")
 func client_player_passed(player_id: int):
 	player_passed_turn.emit(player_id)

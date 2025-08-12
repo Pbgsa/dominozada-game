@@ -78,7 +78,11 @@ func _on_piece_selected(button: Button):
 	# Verificar lados válidos
 	var valid_sides = game_manager.get_valid_sides_for_piece(piece_data)
 	
-	if valid_sides.is_empty():
+	if game_manager.current_mode == 2 and not game_manager.is_board_empty():
+		valid_sides.clear()
+		valid_sides.append("left")
+		valid_sides.append("right")
+	elif valid_sides.is_empty():
 		# Mostrar informações de debug das cabeças jogáveis  
 		# print("Essa peça [%d,%d] não pode ser jogada." % [piece_data.a, piece_data.b])
 		# _print_board_debug_info()
@@ -90,10 +94,10 @@ func _on_piece_selected(button: Button):
 	set_selection_visual(button)
 	
 	if valid_sides.size() == 1:
-		print("Apenas um lado disponível, jogando automaticamente...")
+		# print("Apenas um lado disponível, jogando automaticamente...")
 		_on_placement_side_selected(valid_sides[0], piece_data)
 	else:
-		print("Múltiplas opções, mostrando UI de seleção...")
+		# print("Múltiplas opções, mostrando UI de seleção...")
 		placement_options_instance.show_options(piece_data, valid_sides)
 
 func _is_player_turn() -> bool:
