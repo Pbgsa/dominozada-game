@@ -9,7 +9,6 @@ extends CanvasLayer
 @onready var reason_label := $MainContainer/GameOverPanel/GameOverContent/ReasonLabel
 @onready var new_game_button := $MainContainer/GameOverPanel/GameOverContent/NewGameButton if has_node("MainContainer/GameOverPanel/GameOverContent/NewGameButton") else null
 @onready var buy_button := $MainContainer/ActionButtons/BuyButton
-@onready var lobby_button := $MainContainer/GameOverPanel/GameOverContent/LobbyButton if has_node("MainContainer/GameOverPanel/GameOverContent/LobbyButton") else null
 @onready var main_menu_button := $MainContainer/GameOverPanel/GameOverContent/MainMenuButton if has_node("MainContainer/GameOverPanel/GameOverContent/MainMenuButton") else null
 @onready var report_button := $MainContainer/ActionButtons/ReportButton
 
@@ -53,8 +52,6 @@ func _ready():
 		new_game_button.pressed.connect(_on_new_game_button_pressed)
 	if main_menu_button:
 		main_menu_button.pressed.connect(_on_main_menu_button_pressed)
-	if lobby_button:
-		lobby_button.pressed.connect(_on_lobby_button_pressed)
 	
 	# UI inicial - permitir inputs passarem através por padrão
 	if has_node("MainContainer"):
@@ -235,16 +232,8 @@ func _on_main_menu_button_pressed():
 		if multiplayer.multiplayer_peer:
 			multiplayer.multiplayer_peer.close()
 			multiplayer.multiplayer_peer = null
-	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 	
-func _on_lobby_button_pressed():
-	if NetworkManager.is_online_mode:
-		if multiplayer.multiplayer_peer:
-			multiplayer.multiplayer_peer.close()
-			multiplayer.multiplayer_peer = null
-	else:
-		NetworkManager.is_online_mode = true
-	get_tree().change_scene_to_file("res://scenes/Hub.tscn")
 
 func _on_report_button_pressed():
 	"""Denuncia jogada inválida"""
