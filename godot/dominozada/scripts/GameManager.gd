@@ -60,8 +60,37 @@ var last_invalid_move: Dictionary = {}  # { player_id, piece, side, round }
 var current_round: int = 0
 
 func _ready():
+	# Set up custom cursor
+	setup_custom_cursor()
+	
 	domino_set = DominoSetScript.new()
 	setup_players()
+
+func setup_custom_cursor():
+	"""Set up the custom cursor for the game"""
+	var cursor_texture = load("res://assets/textures/ui/cursor.png") as Texture2D
+	if cursor_texture:
+		# Calculate the scaling factor based on game resolution
+		# Game is 640x360 native, upscaled to 1280x720 (2x scale)
+		var scale_factor = 2.0
+		
+		# Create a scaled version of the cursor
+		var original_size = cursor_texture.get_size()
+		var scaled_size = original_size * scale_factor
+		
+		# Create an ImageTexture with the scaled cursor
+		var image = cursor_texture.get_image()
+		image.resize(int(scaled_size.x), int(scaled_size.y), Image.INTERPOLATE_NEAREST)
+		
+		var scaled_cursor = ImageTexture.new()
+		scaled_cursor.set_image(image)
+		
+		# Set the cursor with scaled texture and adjusted hotspot
+		var hotspot = Vector2(0, 0) * scale_factor  # Scale the hotspot too
+		Input.set_custom_mouse_cursor(scaled_cursor, Input.CURSOR_ARROW, hotspot)
+		print("Custom cursor loaded successfully with 2x scaling")
+	else:
+		print("Failed to load custom cursor")
 	
 func register_board(board_node: Node):
 	if is_instance_valid(board_node) and board_node.has_method("get_board_left_value"):
