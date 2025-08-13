@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://ukk8wklb6w30"]
+
+[ext_resource type="Script" uid="uid://dvq0bkyy1o78h" path="res://scripts/opponent.gd" id="1_a6re5"]
+
+[node name="HOpponentHand" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 1
+alignment = 1
+script = ExtResource("1_a6re5")

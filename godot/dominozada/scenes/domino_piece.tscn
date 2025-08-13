@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://ctoqeabxppbnu"]
+
+[ext_resource type="Script" uid="uid://bhg7kpe0rgn5j" path="res://scripts/domino_piece.gd" id="1_vi3qo"]
+[ext_resource type="Texture2D" uid="uid://ce1g1c4p8gs4f" path="res://assets/textures/domino_pixelart_asset_pack/left/Domino_Left_1.png" id="2_vi3qo"]
+
+[node name="DominoPiece" type="Node2D"]
+script = ExtResource("1_vi3qo")
+
+[node name="DominoSprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_vi3qo")

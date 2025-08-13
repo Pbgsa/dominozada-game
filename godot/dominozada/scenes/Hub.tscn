@@ -1,0 +1,62 @@
+[gd_scene load_steps=2 format=3 uid="uid://syp3k0y8gcwb"]
+
+[ext_resource type="Script" uid="uid://bxm1gp1mn0nd0" path="res://scripts/hub.gd" id="1_8mbd6"]
+
+[node name="Hub" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_8mbd6")
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopRow" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="IPInput" type="LineEdit" parent="MainContainer/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "IP do Servidor"
+
+[node name="JoinButton" type="Button" parent="MainContainer/TopRow"]
+layout_mode = 2
+text = "Join"
+
+[node name="HostButton" type="Button" parent="MainContainer/TopRow"]
+layout_mode = 2
+text = "Host"
+
+[node name="PlayerNameInput" type="LineEdit" parent="MainContainer/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Digite seu nome..."
+
+[node name="StartButton" type="Button" parent="MainContainer/TopRow"]
+layout_mode = 2
+text = "Iniciar Jogo"
+
+[node name="PlayerList" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomRow" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+
+[node name="LobbyExitButton" type="Button" parent="MainContainer/BottomRow"]
+layout_mode = 2
+text = "Menu
+Principal"

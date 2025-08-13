@@ -1,0 +1,181 @@
+[gd_scene load_steps=5 format=3 uid="uid://yggyl4cov555"]
+
+[ext_resource type="Theme" uid="uid://f7x1vcbq15h1" path="res://ui/menu_theme.tres" id="1_bqqt6"]
+[ext_resource type="Script" uid="uid://uwlcfmwdonkb" path="res://scripts/main_menu.gd" id="1_ekxnf"]
+[ext_resource type="Texture2D" uid="uid://mn86vn6pi3it" path="res://assets/textures/table_backgrounds/zdefault_table.png" id="1_l6cm7"]
+[ext_resource type="PackedScene" uid="uid://syp3k0y8gcwb" path="res://scenes/Hub.tscn" id="4_wu84c"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_bqqt6")
+script = ExtResource("1_ekxnf")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_l6cm7")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainView" type="VBoxContainer" parent="CenterContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="Label" type="Label" parent="CenterContainer/MainView"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Dominozada maneiro muito bolado"
+
+[node name="BotaoMultiplayer" type="Button" parent="CenterContainer/MainView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Jogar online"
+
+[node name="BotaoSingleplayer" type="Button" parent="CenterContainer/MainView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Jogar offline"
+
+[node name="BotaoExit" type="Button" parent="CenterContainer/MainView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Sair do jogo"
+
+[node name="OfflineView" type="VBoxContainer" parent="CenterContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="Label" type="Label" parent="CenterContainer/OfflineView"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Selecione modo de jogo"
+
+[node name="BotaoModoClassico" type="Button" parent="CenterContainer/OfflineView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Modo clássico"
+
+[node name="BotaoModoPuxandoMorto" type="Button" parent="CenterContainer/OfflineView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Modo puxando do morto"
+
+[node name="BotaoModoGatoComLebre" type="Button" parent="CenterContainer/OfflineView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Modo gato com lebre"
+
+[node name="BotaoVoltarOffline" type="Button" parent="CenterContainer/OfflineView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Voltar"
+
+[node name="OnlineView" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 125
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/OnlineView"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/OnlineView/HBoxContainer"]
+layout_mode = 2
+text = "Selecione modo de jogo"
+
+[node name="OnlineModeOption" type="OptionButton" parent="CenterContainer/OnlineView/HBoxContainer"]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+
+[node name="Hub" parent="CenterContainer/OnlineView" instance=ExtResource("4_wu84c")]
+layout_mode = 2
+
+[node name="HostGameSelectionView" type="VBoxContainer" parent="CenterContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 200
+
+[node name="Label" type="Label" parent="CenterContainer/HostGameSelectionView"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Selecionar modo de jogo"
+
+[node name="BotaoModoClassicoOnline" type="Button" parent="CenterContainer/HostGameSelectionView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Modo clássico"
+
+[node name="BotaoModoPuxandoMortoOnline" type="Button" parent="CenterContainer/HostGameSelectionView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Modo puxando do morto"
+
+[node name="BotaoModoGatoComLebreOnline" type="Button" parent="CenterContainer/HostGameSelectionView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Modo gato com lebre"
+
+[node name="BotaoVoltarHost" type="Button" parent="CenterContainer/HostGameSelectionView" groups=["menu_buttons"]]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Voltar"
+
+[connection signal="mouse_entered" from="CenterContainer/MainView/BotaoMultiplayer" to="." method="_on_botao_multiplayer_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/MainView/BotaoMultiplayer" to="." method="_on_botao_multiplayer_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/MainView/BotaoMultiplayer" to="." method="_on_botao_online_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/MainView/BotaoSingleplayer" to="." method="_on_botao_multiplayer_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/MainView/BotaoSingleplayer" to="." method="_on_botao_multiplayer_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/MainView/BotaoSingleplayer" to="." method="_on_botao_offline_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/MainView/BotaoExit" to="." method="_on_botao_multiplayer_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/MainView/BotaoExit" to="." method="_on_botao_multiplayer_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/MainView/BotaoExit" to="." method="_on_botao_sair_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/OfflineView/BotaoModoClassico" to="." method="_on_botao_modo_classico_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/OfflineView/BotaoModoClassico" to="." method="_on_botao_modo_classico_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/OfflineView/BotaoModoClassico" to="." method="_on_botao_classico_offline_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/OfflineView/BotaoModoPuxandoMorto" to="." method="_on_botao_modo_burrinho_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/OfflineView/BotaoModoPuxandoMorto" to="." method="_on_botao_modo_burrinho_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/OfflineView/BotaoModoPuxandoMorto" to="." method="_on_botao_puxando_morto_offline_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/OfflineView/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/OfflineView/BotaoModoGatoComLebre" to="." method="_on_botao_modo_gato_com_lebre_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/OfflineView/BotaoModoGatoComLebre" to="." method="_on_botao_gato_lebre_offline_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/OfflineView/BotaoVoltarOffline" to="." method="_on_botao_modo_gato_com_lebre_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/OfflineView/BotaoVoltarOffline" to="." method="_on_botao_modo_gato_com_lebre_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/OfflineView/BotaoVoltarOffline" to="." method="_on_botao_voltar_de_offline_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/HostGameSelectionView/BotaoModoClassicoOnline" to="." method="_on_botao_modo_classico_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/HostGameSelectionView/BotaoModoClassicoOnline" to="." method="_on_botao_modo_classico_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/HostGameSelectionView/BotaoModoClassicoOnline" to="." method="_on_botao_classico_online_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/HostGameSelectionView/BotaoModoPuxandoMortoOnline" to="." method="_on_botao_modo_burrinho_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/HostGameSelectionView/BotaoModoPuxandoMortoOnline" to="." method="_on_botao_modo_burrinho_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/HostGameSelectionView/BotaoModoPuxandoMortoOnline" to="." method="_on_botao_puxando_morto_online_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/HostGameSelectionView/BotaoModoGatoComLebreOnline" to="." method="_on_botao_modo_gato_com_lebre_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/HostGameSelectionView/BotaoModoGatoComLebreOnline" to="." method="_on_botao_modo_gato_com_lebre_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/HostGameSelectionView/BotaoModoGatoComLebreOnline" to="." method="_on_botao_gato_lebre_online_pressed"]
+[connection signal="mouse_entered" from="CenterContainer/HostGameSelectionView/BotaoVoltarHost" to="." method="_on_botao_modo_gato_com_lebre_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/HostGameSelectionView/BotaoVoltarHost" to="." method="_on_botao_modo_gato_com_lebre_mouse_exited"]
+[connection signal="pressed" from="CenterContainer/HostGameSelectionView/BotaoVoltarHost" to="." method="_on_botao_voltar_de_host_pressed"]

@@ -1,0 +1,74 @@
+[gd_scene load_steps=7 format=3 uid="uid://bwui6cfgnq0pi"]
+
+[ext_resource type="Script" uid="uid://dtebb1dp2mdhr" path="res://scripts/board.gd" id="1_tx6nw"]
+[ext_resource type="Texture2D" uid="uid://mn86vn6pi3it" path="res://assets/textures/table_backgrounds/zdefault_table.png" id="2_dxjtj"]
+[ext_resource type="PackedScene" uid="uid://bmhq16csacx2" path="res://scenes/player_hand.tscn" id="3_nglv8"]
+[ext_resource type="PackedScene" uid="uid://dp60ecnv41070" path="res://scenes/opponent_hands.tscn" id="4_fv4ni"]
+[ext_resource type="PackedScene" uid="uid://bp3vhadl5ywo1" path="res://scenes/change_background_button.tscn" id="5_dxjtj"]
+[ext_resource type="PackedScene" uid="uid://1nodedq6gwob" path="res://scenes/game_ui.tscn" id="6_game_ui"]
+
+[node name="Board" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_tx6nw")
+
+[node name="TableBackground" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_dxjtj")
+expand_mode = 1
+
+[node name="GameArea" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -100.0
+offset_right = 200.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PlayedPieces" type="Node2D" parent="GameArea"]
+position = Vector2(200, 100)
+
+[node name="Heads" type="Node2D" parent="GameArea"]
+position = Vector2(200, 100)
+
+[node name="LeftHead" type="Marker2D" parent="GameArea/Heads"]
+position = Vector2(100, 0)
+gizmo_extents = 1.0
+
+[node name="RightHead" type="Marker2D" parent="GameArea/Heads"]
+position = Vector2(300, 0)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="OpponentHands" parent="CanvasLayer" instance=ExtResource("4_fv4ni")]
+
+[node name="PlayerHand" parent="CanvasLayer" instance=ExtResource("3_nglv8")]
+
+[node name="ChangeBackgroundButton" parent="CanvasLayer" node_paths=PackedStringArray("table_sprite") instance=ExtResource("5_dxjtj")]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -100.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 30.0
+theme_override_font_sizes/font_size = 10
+text = "Change BG"
+table_sprite = NodePath("../../TableBackground")
+
+[node name="GameUI" parent="CanvasLayer" instance=ExtResource("6_game_ui")]

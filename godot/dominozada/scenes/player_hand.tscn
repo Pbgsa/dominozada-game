@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://bmhq16csacx2"]
+
+[ext_resource type="Script" uid="uid://bsxx8yd4yrgbl" path="res://scripts/player_hand.gd" id="1_7gyfc"]
+
+[node name="PlayerHand" type="HBoxContainer"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -80.0
+offset_right = 200.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 0
+alignment = 1
+script = ExtResource("1_7gyfc")
