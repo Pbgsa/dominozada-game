@@ -6,6 +6,9 @@ extends Control
 @onready var online_view = $CenterContainer/OnlineView
 @onready var host_game_selection_view = $CenterContainer/HostGameSelectionView
 
+# Variável para o OptionButton de seleção de modo online
+var online_mode_option: OptionButton
+
 # A função _ready é chamada quando o nó e seus filhos entram na árvore da cena.
 func _ready():
 	# Garante que o menu sempre comece na tela principal
@@ -16,6 +19,9 @@ func _ready():
 	var buttons = get_tree().get_nodes_in_group("menu_buttons")
 	for button in buttons:
 		button.pivot_offset = button.size / 2.0
+	
+	# Configurar OptionButton do modo online
+	setup_online_mode_option()
 
 
 # --- FUNÇÕES DE CONTROLE DE VISIBILIDADE ---
@@ -77,30 +83,8 @@ func _on_botao_voltar_de_offline_pressed():
 
 
 # --- SINAIS DA TELA ONLINE (OnlineView) ---
-func _on_botao_host_pressed():
-	#var player_name = online_view.get_node("InputNome").text
-	#if player_name.is_empty():
-	#	print("Erro: Por favor, digite seu nome antes de criar uma sala.")
-	#	return
-		
-	# --- CHAME SUA LÓGICA DE REDE AQUI PARA CRIAR O SERVIDOR ---
-	# Ex: NetworkManager.create_server(player_name)
-	#print("Servidor criado! Nome do Host: %s" % player_name)
-	
-	# Após criar a sala, mostre a tela de seleção de modo para o host
-	show_host_game_selection_view()
-
-func _on_botao_join_pressed():
-	#var player_name = online_view.get_node("InputNome").text
-	#var ip_address = online_view.get_node("InputIP").text
-	#if player_name.is_empty() or ip_address.is_empty():
-	#	print("Erro: Preencha seu nome e o IP do servidor.")
-	#	return
-
-	# --- CHAME SUA LÓGICA DE REDE AQUI PARA ENTRAR EM UM SERVIDOR ---
-	# Ex: NetworkManager.join_server(ip_address, player_name)
-	#print("Tentando entrar no servidor %s como %s" % [ip_address, player_name])
-	pass
+# NOTA: As funções de host/join agora estão no Hub.tscn/hub.gd
+# O OptionButton continua sendo configurado aqui no menu principal
 
 func _on_botao_voltar_de_online_pressed():
 	show_main_view()
@@ -135,3 +119,78 @@ func _animate_button_scale(button: Button, target_scale: Vector2):
 
 # Não se esqueça de conectar os sinais de mouse_entered e mouse_exited
 # para cada um dos novos botões para que a animação funcione!
+
+
+# --- SISTEMA DE SELEÇÃO DE MODO ONLINE ---
+func setup_online_mode_option():
+	"""Configura o OptionButton com os modos de jogo disponíveis"""
+	# Tentar encontrar o OptionButton na tela online
+	if online_view:
+		online_mode_option = online_view.find_child("*ModeOption*", true, false)
+		if not online_mode_option:
+			online_mode_option = online_view.find_child("OptionButton", true, false)
+	
+	if online_mode_option:
+		# Limpar opções existentes
+		online_mode_option.clear()
+		
+		# Adicionar os modos de jogo
+		online_mode_option.add_item("Clássico", GameManagerMultiplayer.GameMode.CLASSICO)
+		online_mode_option.add_item("Puxando do Morto", GameManagerMultiplayer.GameMode.PUXANDO_DO_MORTO)
+		online_mode_option.add_item("Gato com Lebre", GameManagerMultiplayer.GameMode.GATO_COM_LEBRE)
+		
+		# Definir o modo padrão como Clássico
+		online_mode_option.selected = 0
+		
+		# Conectar o sinal de mudança de seleção
+		if not online_mode_option.item_selected.is_connected(_on_online_mode_selected):
+			online_mode_option.item_selected.connect(_on_online_mode_selected)
+		
+		print("MENU: OptionButton configurado com sucesso!")
+	else:
+		print("MENU: AVISO - OptionButton não encontrado na tela online.")
+
+func configure_option_button_manually(option_button: OptionButton):
+	"""Função alternativa para configurar o OptionButton manualmente"""
+	online_mode_option = option_button
+	if online_mode_option:
+		# Limpar opções existentes
+		online_mode_option.clear()
+		
+		# Adicionar os modos de jogo
+		online_mode_option.add_item("Clássico", GameManagerMultiplayer.GameMode.CLASSICO)
+		online_mode_option.add_item("Puxando do Morto", GameManagerMultiplayer.GameMode.PUXANDO_DO_MORTO)
+		online_mode_option.add_item("Gato com Lebre", GameManagerMultiplayer.GameMode.GATO_COM_LEBRE)
+		
+		# Definir o modo padrão como Clássico
+		online_mode_option.selected = 0
+		
+		# Conectar o sinal de mudança de seleção
+		if not online_mode_option.item_selected.is_connected(_on_online_mode_selected):
+			online_mode_option.item_selected.connect(_on_online_mode_selected)
+		
+		print("MENU: OptionButton configurado manualmente com sucesso!")
+
+func get_selected_online_mode() -> GameManagerMultiplayer.GameMode:
+	"""Retorna o modo de jogo selecionado no OptionButton"""
+	if online_mode_option and online_mode_option.selected >= 0:
+		return online_mode_option.get_item_id(online_mode_option.selected)
+	else:
+		# Valor padrão se não houver seleção
+		print("MENU: Usando modo padrão (Clássico)")
+		return GameManagerMultiplayer.GameMode.CLASSICO
+
+func get_selected_online_mode_name() -> String:
+	"""Retorna o nome do modo de jogo selecionado"""
+	if online_mode_option and online_mode_option.selected >= 0:
+		return online_mode_option.get_item_text(online_mode_option.selected)
+	else:
+		return "Clássico"
+
+func _on_online_mode_selected(index: int):
+	"""Callback quando um modo é selecionado no OptionButton"""
+	if online_mode_option:
+		var mode_id = online_mode_option.get_item_id(index)
+		var mode_name = online_mode_option.get_item_text(index)
+		print("MENU: Modo selecionado: %s (ID: %d)" % [mode_name, mode_id])
+		print("MENU: ⚠️  Lembre-se: O modo será aplicado quando INICIAR o jogo, não ao criar o servidor!")

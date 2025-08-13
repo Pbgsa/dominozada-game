@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://7mauf2447qxr"]
+[gd_scene load_steps=5 format=3 uid="uid://yggyl4cov555"]
 
 [ext_resource type="Theme" uid="uid://f7x1vcbq15h1" path="res://ui/menu_theme.tres" id="1_bqqt6"]
 [ext_resource type="Script" uid="uid://uwlcfmwdonkb" path="res://scripts/main_menu.gd" id="1_ekxnf"]
@@ -96,7 +96,7 @@ text = "Voltar"
 
 [node name="OnlineView" type="VBoxContainer" parent="CenterContainer"]
 layout_mode = 2
-theme_override_constants/separation = 30
+theme_override_constants/separation = 125
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/OnlineView"]
 layout_mode = 2
@@ -121,7 +121,7 @@ text = "Voltar"
 [node name="HostGameSelectionView" type="VBoxContainer" parent="CenterContainer"]
 visible = false
 layout_mode = 2
-theme_override_constants/separation = 30
+theme_override_constants/separation = 200
 
 [node name="Label" type="Label" parent="CenterContainer/HostGameSelectionView"]
 layout_mode = 2
