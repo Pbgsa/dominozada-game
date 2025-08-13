@@ -5,6 +5,9 @@ extends Control
 @onready var offline_game_manager = $GameManager
 @export var domino_piece_scene: PackedScene = preload("res://scenes/domino_piece.tscn")
 
+# Create audio player dynamically to have full control
+var piece_place_audio: AudioStreamPlayer
+
 var visual_pieces: Array[Node2D] = []
 var left_head_pos := Vector2.ZERO
 var right_head_pos := Vector2.ZERO
@@ -23,6 +26,20 @@ signal board_state_changed(left_value: int, right_value: int, is_empty: bool)
 # --------------------------------------------------------------------
 
 func _ready():
+	# Create audio player dynamically with explicit settings
+	piece_place_audio = AudioStreamPlayer.new()
+	add_child(piece_place_audio)
+	
+	# Load the audio stream and ensure it doesn't loop
+	var audio_stream = load("res://assets/sounds/set_piece.wav") as AudioStreamWAV
+	if audio_stream:
+		audio_stream.loop_mode = AudioStreamWAV.LOOP_DISABLED
+		piece_place_audio.stream = audio_stream
+		piece_place_audio.volume_db = -10.0
+		piece_place_audio.autoplay = false
+	else:
+		print("ERROR: Could not load audio file")
+	
 	if NetworkManager.is_online_mode:
 		game_manager = GameManagerMultiplayer
 		game_manager.server_player_is_ready.rpc()
@@ -32,6 +49,7 @@ func _ready():
 	game_manager.game_started.connect(clear_board)
 	game_manager.piece_played_on_board.connect(_on_piece_played_on_board)
 	game_manager.remove_piece_from_board.connect(_on_piece_removed_from_board)
+
 
 # --- CORREÇÃO: Função de posicionamento de peças reescrita ---
 func _on_piece_played_on_board(piece_data: Dictionary, side: String, _player_id: int):
@@ -59,6 +77,11 @@ func add_piece_to_board(data: Dictionary, requested_side: String = ""):
 		right_head_pos = Vector2.ZERO
 		
 		create_visual_piece_at_center()
+		
+		# Play piece placement sound
+		if piece_place_audio:
+			piece_place_audio.stop()  # Stop any previous playback
+			piece_place_audio.play()
 		
 		# Notificar mudança de estado
 		board_state_changed.emit(board_left_value, board_right_value, board_is_empty)
@@ -115,6 +138,11 @@ func add_piece_to_board(data: Dictionary, requested_side: String = ""):
 		
 		create_visual_piece_at_side(actual_side)
 		update_head_positions()
+		
+		# Play piece placement sound
+		if piece_place_audio:
+			piece_place_audio.stop()  # Stop any previous playback
+			piece_place_audio.play()
 		
 		# Notificar mudança de estado
 		board_state_changed.emit(board_left_value, board_right_value, board_is_empty)
