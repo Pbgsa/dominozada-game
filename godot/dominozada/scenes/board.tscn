@@ -1,12 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://bwui6cfgnq0pi"]
+[gd_scene load_steps=7 format=3 uid="uid://bwui6cfgnq0pi"]
 
 [ext_resource type="Script" uid="uid://dtebb1dp2mdhr" path="res://scripts/board.gd" id="1_tx6nw"]
 [ext_resource type="Texture2D" uid="uid://mn86vn6pi3it" path="res://assets/textures/table_backgrounds/zdefault_table.png" id="2_dxjtj"]
-[ext_resource type="PackedScene" uid="uid://bmhq16csacx2" path="res://scenes/player_hand.tscn" id="3_nglv8"]
+[ext_resource type="PackedScene" path="res://scenes/player_hand.tscn" id="3_nglv8"]
 [ext_resource type="PackedScene" uid="uid://dp60ecnv41070" path="res://scenes/opponent_hands.tscn" id="4_fv4ni"]
 [ext_resource type="PackedScene" uid="uid://bp3vhadl5ywo1" path="res://scenes/change_background_button.tscn" id="5_dxjtj"]
 [ext_resource type="PackedScene" uid="uid://1nodedq6gwob" path="res://scenes/game_ui.tscn" id="6_game_ui"]
-[ext_resource type="Script" uid="uid://bds5waf8c1fyw" path="res://scripts/GameManager.gd" id="7_c3r7o"]
 
 [node name="Board" type="Control"]
 layout_mode = 3
@@ -72,6 +71,3 @@ text = "Change BG"
 table_sprite = NodePath("../../TableBackground")
 
 [node name="GameUI" parent="CanvasLayer" instance=ExtResource("6_game_ui")]
-
-[node name="GameManager" type="Node" parent="."]
-script = ExtResource("7_c3r7o")

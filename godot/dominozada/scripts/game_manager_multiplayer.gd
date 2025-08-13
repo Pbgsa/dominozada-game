@@ -24,10 +24,15 @@ var current_turn_index := 0
 # REMOVIDO: board_left_value, board_right_value, board_is_empty - usa o board como fonte da verdade
 var passes_in_a_row := 0
 var ready_players := []
-var current_mode: GameMode = GameMode.GATO_COM_LEBRE
+var current_mode: GameMode = GameMode.CLASSICO  # Valor padrão mais neutro
 var board: Node  # Referência ao board
 var last_invalid_move: Dictionary = {}  # { player_id, piece, side, round }
 var current_round: int = 0
+
+func set_next_game_mode(mode: GameMode):
+	"""Define o modo de jogo para a próxima partida"""
+	current_mode = mode
+	print("MULTIPLAYER: Modo de jogo definido para: ", GameMode.keys()[current_mode])
 
 func _ready():
 	# Aguardar um frame para garantir que a cena esteja carregada
@@ -84,7 +89,10 @@ func server_player_is_ready():
 
 func _start_actual_game():
 	# print("DEBUG MULTIPLAYER: Iniciando jogo...")
-	current_mode = GameMode.GATO_COM_LEBRE
+	print("DEBUG MULTIPLAYER: Iniciando jogo no modo: ", GameMode.keys()[current_mode])
+	
+	# IMPORTANTE: Sincronizar o modo de jogo para todos os clientes
+	rpc("client_set_game_mode", current_mode)
 	
 	# Garantir que temos o board antes de iniciar o jogo
 	if not board or not is_instance_valid(board):
@@ -360,7 +368,7 @@ func server_report_invalid_move():
 	if not last_invalid_move.is_empty():
 
 		var piece = last_invalid_move.piece
-		var side = last_invalid_move.side
+		var _side = last_invalid_move.side
 		var player_id = last_invalid_move.player_id
 
 		# Remover a peça do board
@@ -440,6 +448,12 @@ func is_board_empty() -> bool:
 
 func _set_turn(player_id: int):
 	rpc("client_set_turn", player_id)
+@rpc("authority", "call_local", "reliable")
+func client_set_game_mode(mode: GameMode):
+	"""Sincroniza o modo de jogo do host para todos os clientes"""
+	current_mode = mode
+	print("DEBUG MULTIPLAYER: Modo de jogo sincronizado para: ", GameMode.keys()[current_mode])
+
 @rpc("authority", "call_local", "reliable")
 func client_receive_hand(hand: Array):
 	hand_updated.emit.call_deferred(hand)

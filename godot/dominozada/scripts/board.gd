@@ -2,7 +2,7 @@
 extends Control
 
 @onready var played_pieces_container := $GameArea/PlayedPieces
-@onready var offline_game_manager = $GameManager
+#@onready var offline_game_manager = $GameManager
 @export var domino_piece_scene: PackedScene = preload("res://scenes/domino_piece.tscn")
 
 var visual_pieces: Array[Node2D] = []
@@ -23,15 +23,42 @@ signal board_state_changed(left_value: int, right_value: int, is_empty: bool)
 # --------------------------------------------------------------------
 
 func _ready():
+	print("BOARD: Iniciando board.gd")
+	print("BOARD: NetworkManager.is_online_mode = ", NetworkManager.is_online_mode)
+	
+	# Primeiro, o board se registra no GameManager
+	GameManager.register_board(self)
+	print("BOARD: Board registrado no GameManager")
+
 	if NetworkManager.is_online_mode:
+		print("BOARD: Usando GameManagerMultiplayer")
 		game_manager = GameManagerMultiplayer
 		game_manager.server_player_is_ready.rpc()
 	else:
-		game_manager = offline_game_manager
-
+		print("BOARD: Usando GameManager offline")
+		# Agora que o board já se registrou, podemos continuar com segurança
+		game_manager = GameManager
+		
+	# Conecta os sinais como antes
+	print("BOARD: Conectando sinais")
 	game_manager.game_started.connect(clear_board)
 	game_manager.piece_played_on_board.connect(_on_piece_played_on_board)
 	game_manager.remove_piece_from_board.connect(_on_piece_removed_from_board)
+	
+	# Inicia o jogo apenas no modo offline, após conectar os sinais
+	# Usar call_deferred para garantir que tudo esteja inicializado
+	if not NetworkManager.is_online_mode:
+		print("BOARD: Agendando início do jogo offline")
+		call_deferred("start_offline_game")
+
+func start_offline_game():
+	"""Inicia o jogo offline após garantir que tudo está inicializado"""
+	print("BOARD: Iniciando jogo offline")
+	if GameManager and GameManager.has_method("start_new_game"):
+		print("BOARD: Chamando GameManager.start_new_game()")
+		GameManager.start_new_game()
+	else:
+		print("ERRO: GameManager não encontrado ou método start_new_game não disponível")
 
 # --- CORREÇÃO: Função de posicionamento de peças reescrita ---
 func _on_piece_played_on_board(piece_data: Dictionary, side: String, _player_id: int):
@@ -81,7 +108,7 @@ func add_piece_to_board(data: Dictionary, requested_side: String = ""):
 				placed = true
 				actual_side = "left"
 				# print("DEBUG: Peça conectada na ESQUERDA (piece_b=%d == left_value). Nova esquerda: %d" % [piece_b, board_left_value])
-			elif game_manager.current_mode == 2:
+			elif game_manager.current_mode == GameManager.GameMode.GATO_COM_LEBRE:
 				pieces_sequence.push_front({"a": piece_b, "b": piece_a})
 				board_left_value = piece_b
 				placed = true
@@ -101,7 +128,7 @@ func add_piece_to_board(data: Dictionary, requested_side: String = ""):
 				placed = true
 				actual_side = "right"
 				# print("DEBUG: Peça conectada na DIREITA (piece_b=%d == right_value). Nova direita: %d" % [piece_b, board_right_value])
-			elif game_manager.current_mode == 2:
+			elif game_manager.current_mode == GameManager.GameMode.GATO_COM_LEBRE:
 				pieces_sequence.append({"a": piece_b, "b": piece_a})
 				board_right_value = piece_b
 				placed = true
@@ -268,25 +295,25 @@ func calculate_piece_position_by_side(side: String) -> Dictionary:
 				# The piece now goes up to avoid off screen setting
 				current_orientation = get_piece_orientation_for_side_vertical(current_piece.a, current_piece.b, side)
 				if (adjacent_orientation == "up" or adjacent_orientation == "down") and up_left_increment == 0:
-					result.position = leftmost_position - Vector2((adjacent_width / 2) - 1, total_spacing + 2)
+					result.position = leftmost_position - Vector2((adjacent_width / 2.0) - 1, total_spacing + 2)
 					if current_piece.a == current_piece.b:
 						current_orientation = "up"
-						result.position = leftmost_position - Vector2((adjacent_width / 2), total_spacing + (adjacent_width / 2))
+						result.position = leftmost_position - Vector2((adjacent_width / 2.0), total_spacing + (adjacent_width / 2.0))
 				elif (current_orientation == "up" or current_orientation == "down") and (adjacent_orientation == "up" or adjacent_orientation == "down") and up_left_increment == 1:
-					result.position = leftmost_position - Vector2(0, total_spacing + (adjacent_width / 2))
-					print("entrou nessa poha")
+					result.position = leftmost_position - Vector2(0, total_spacing + (adjacent_width / 2.0))
+					# Debug: Special case handling
 				else:
 					result.position = leftmost_position - Vector2(0, total_spacing)
 				result.direction = current_orientation
 				up_left_increment += 1
-				print("DEBUG: Piece a: %d, Piece b: %d" % [current_piece.a, current_piece.b])
-				print("DEBUG: Leftmost position: %s, Current orientation: %s, Adjacent orientation: %s, and result: %s" % [leftmost_position, current_orientation, adjacent_orientation, result])
+				# print("DEBUG: Piece a: %d, Piece b: %d" % [current_piece.a, current_piece.b])
+				# print("DEBUG: Leftmost position: %s, Current orientation: %s, Adjacent orientation: %s, and result: %s" % [leftmost_position, current_orientation, adjacent_orientation, result])
 				return result
 
 			if up_left_increment >= 2:
 				current_orientation = get_piece_orientation_for_side(current_piece.b, current_piece.a, side)
 				if up_left_increment == 2 and (adjacent_orientation == "up" or adjacent_orientation == "down"):
-					result.position = leftmost_position + Vector2(total_spacing, (-(adjacent_width / 2)) + 1)
+					result.position = leftmost_position + Vector2(total_spacing, (-(adjacent_width / 2.0)) + 1)
 					if current_piece.a == current_piece.b:
 						current_orientation = "right"
 					# print("DEBUG: Up left increment 2, position: %s, current orientation: %s, adjacent orientation: %s" % [result.position, current_orientation, adjacent_orientation])
@@ -341,29 +368,29 @@ func calculate_piece_position_by_side(side: String) -> Dictionary:
 				# The piece now goes down to avoid off screen setting
 				current_orientation = get_piece_orientation_for_side_vertical(current_piece.a, current_piece.b, side)
 				if (adjacent_orientation == "up" or adjacent_orientation == "down") and down_right_increment == 0:
-					result.position = rightmost_position + Vector2((adjacent_width / 2) - 1, total_spacing + 2)
+					result.position = rightmost_position + Vector2((adjacent_width / 2.0) - 1, total_spacing + 2)
 					if current_piece.a == current_piece.b:
 						current_orientation = "up"
-						result.position = rightmost_position + Vector2((adjacent_width / 2) - 1, total_spacing + (adjacent_width / 2))
+						result.position = rightmost_position + Vector2((adjacent_width / 2.0) - 1, total_spacing + (adjacent_width / 2.0))
 				elif (current_orientation == "up" or current_orientation == "down") and (adjacent_orientation == "up" or adjacent_orientation == "down") and down_right_increment == 1:
-					result.position = rightmost_position + Vector2(0, total_spacing + (adjacent_width / 2))
-					print("entrou nessa poha")
+					result.position = rightmost_position + Vector2(0, total_spacing + (adjacent_width / 2.0))
+					# Debug: Special case handling
 				else:
 					result.position = rightmost_position + Vector2(0, total_spacing)
 				result.direction = current_orientation
 				down_right_increment += 1
 				# Print piece a and b for debugging
-				print("DEBUG: Piece a: %d, Piece b: %d" % [current_piece.a, current_piece.b])
-				print("DEBUG: Rightmost position: %s, Current orientation: %s, Adjacent orientation: %s, and result: %s" % [rightmost_position, current_orientation, adjacent_orientation, result])
+				# print("DEBUG: Piece a: %d, Piece b: %d" % [current_piece.a, current_piece.b])
+				# print("DEBUG: Rightmost position: %s, Current orientation: %s, Adjacent orientation: %s, and result: %s" % [rightmost_position, current_orientation, adjacent_orientation, result])
 				return result
 
 			if down_right_increment >= 2:
 				current_orientation = get_piece_orientation_for_side(current_piece.b, current_piece.a, side)
 				if down_right_increment == 2 and (adjacent_orientation == "up" or adjacent_orientation == "down"):
-					result.position = rightmost_position - Vector2(total_spacing, (-(adjacent_width / 2)) + 1)
+					result.position = rightmost_position - Vector2(total_spacing, (-(adjacent_width / 2.0)) + 1)
 					if current_piece.a == current_piece.b:
 						current_orientation = "right"
-					print("DEBUG: Down right increment 2, position: %s, current orientation: %s, adjacent orientation: %s" % [result.position, current_orientation, adjacent_orientation])
+					# print("DEBUG: Down right increment 2, position: %s, current orientation: %s, adjacent orientation: %s" % [result.position, current_orientation, adjacent_orientation])
 				else:
 					result.position = rightmost_position - Vector2(total_spacing, 0)
 				result.direction = current_orientation
@@ -428,7 +455,7 @@ func remove_piece(last_invalid_move: Dictionary): # { player_id, piece, side, ro
 
 	remove_piece_from_a_side(invalid_piece, invalid_piece_side, invalid_piece_player_id)
 
-func remove_piece_from_a_side(piece: Dictionary, side: String, player_id: int):
+func remove_piece_from_a_side(piece: Dictionary, side: String, _player_id: int):
 	"""Remove uma peça de um lado específico do tabuleiro"""
 
 	if side == "left":
