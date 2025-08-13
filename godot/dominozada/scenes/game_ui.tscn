@@ -108,3 +108,7 @@ layout_mode = 2
 [node name="NewGameButton" type="Button" parent="MainContainer/GameOverPanel/GameOverContent"]
 layout_mode = 2
 text = "Novo Jogo"
+
+[node name="MainMenuButton" type="Button" parent="MainContainer/GameOverPanel/GameOverContent"]
+layout_mode = 2
+text = "Menu Principal"

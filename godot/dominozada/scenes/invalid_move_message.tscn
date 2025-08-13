@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bvhgx0qsw8tjy"]
 
-[ext_resource type="Script" path="res://scripts/invalid_move_message.gd" id="1_7vj8d"]
+[ext_resource type="Script" uid="uid://c3bp0ws72mh7f" path="res://scripts/invalid_move_message.gd" id="1_7vj8d"]
 
 [node name="InvalidMoveMessage" type="CanvasLayer"]
 script = ExtResource("1_7vj8d")

@@ -15,8 +15,8 @@ mouse_filter = 2
 script = ExtResource("1_t6khb")
 
 [node name="TopHand" parent="." instance=ExtResource("2_mwnbu")]
-layout_mode = 1
-anchors_preset = 5
+layout_mode = 0
+anchors_preset = 0
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.0
@@ -24,29 +24,27 @@ offset_left = -175.0
 offset_top = 15.0
 offset_right = 175.0
 offset_bottom = 45.0
-grow_horizontal = 2
 
 [node name="LeftHand" parent="." instance=ExtResource("3_mwnbu")]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
+anchor_right = 0.0
 anchor_bottom = 0.5
 offset_left = 15.0
 offset_top = -60.0
 offset_right = 45.0
 offset_bottom = 60.0
-grow_vertical = 2
+grow_horizontal = 1
 
 [node name="RightHand" parent="." instance=ExtResource("3_mwnbu")]
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
-anchor_right = 1.0
 anchor_bottom = 0.5
 offset_left = -45.0
 offset_top = -60.0
 offset_right = -15.0
 offset_bottom = 60.0
 grow_horizontal = 0
-grow_vertical = 2

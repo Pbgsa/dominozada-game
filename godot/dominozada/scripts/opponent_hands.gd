@@ -12,7 +12,7 @@ func _ready():
 	if NetworkManager.is_online_mode:
 		game_manager = GameManagerMultiplayer
 	else:
-		game_manager = get_node("/root/Board/GameManager")
+		game_manager = GameManager  # Usar o GameManager global
 
 	game_manager.game_started.connect(_on_game_started)
 	game_manager.player_hand_count_changed.connect(_on_player_hand_count_changed)
