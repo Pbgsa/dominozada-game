@@ -9,6 +9,7 @@ extends CanvasLayer
 @onready var reason_label := $MainContainer/GameOverPanel/GameOverContent/ReasonLabel
 @onready var new_game_button := $MainContainer/GameOverPanel/GameOverContent/NewGameButton if has_node("MainContainer/GameOverPanel/GameOverContent/NewGameButton") else null
 @onready var buy_button := $MainContainer/ActionButtons/BuyButton
+@onready var main_menu_button := $MainContainer/GameOverPanel/GameOverContent/MainMenuButton if has_node("MainContainer/GameOverPanel/GameOverContent/MainMenuButton") else null
 @onready var report_button := $MainContainer/ActionButtons/ReportButton
 
 var game_manager: Node
@@ -25,11 +26,9 @@ func _ready():
 	if NetworkManager.is_online_mode:
 		game_manager = GameManagerMultiplayer
 	else:
-		# Tentar diferentes caminhos para encontrar o GameManager offline
-		game_manager = get_node("/root/Board/GameManager") if has_node("/root/Board/GameManager") else null
+		# Usar o GameManager global
+		game_manager = GameManager
 		domino_set = game_manager.domino_set
-		if not game_manager:
-			game_manager = get_node("/root/GameManager") if has_node("/root/GameManager") else null
 	
 	if game_manager:
 		# Conectar sinais comuns a ambos os modos
@@ -51,6 +50,8 @@ func _ready():
 		start_button.pressed.connect(_on_start_button_pressed)
 	if new_game_button:
 		new_game_button.pressed.connect(_on_new_game_button_pressed)
+	if main_menu_button:
+		main_menu_button.pressed.connect(_on_main_menu_button_pressed)
 	
 	# UI inicial - permitir inputs passarem através por padrão
 	if has_node("MainContainer"):
@@ -66,7 +67,7 @@ func _ready():
 	# Configurar botões baseado no modo
 	if NetworkManager.is_online_mode:
 		if start_button:
-			start_button.visible = false  # No multiplayer, o host controla o início
+			start_button.visible = false # No multiplayer, o host controla o início
 	else:
 		update_ui_state()
 
@@ -178,7 +179,7 @@ func _on_player_passed(player_id: int):
 	if game_manager and "players" in game_manager and player_id in game_manager.players:
 		player_name = game_manager.players[player_id].name if typeof(game_manager.players[player_id]) == TYPE_DICTIONARY else game_manager.players[player_id].player_name
 	
-	if player_id == 1:  # Jogador humano (ID 1 no sistema atual)
+	if player_id == 1: # Jogador humano (ID 1 no sistema atual)
 		show_temporary_message("Você passou a vez")
 	else:
 		show_temporary_message(player_name + " passou a vez")
@@ -200,7 +201,7 @@ func _on_pass_button_pressed():
 func _on_start_button_pressed():
 	"""Inicia novo jogo - apenas modo offline"""
 	if NetworkManager.is_online_mode:
-		return  # No multiplayer, o host controla o início
+		return # No multiplayer, o host controla o início
 		
 	if game_manager:
 		game_manager.start_new_game()
@@ -210,7 +211,7 @@ func _on_new_game_button_pressed():
 	if NetworkManager.is_online_mode:
 		# No multiplayer, apenas o host pode iniciar um novo jogo
 		if multiplayer.is_server():
-			game_manager.host_requests_start_game()
+			game_manager._start_actual_game()
 	else:
 		if game_manager:
 			game_manager.start_new_game()
@@ -225,6 +226,14 @@ func _on_buy_button_pressed():
 	else:
 		if game_manager and game_manager.is_human_turn():
 			game_manager.buy_piece()
+			
+func _on_main_menu_button_pressed():
+	if NetworkManager.is_online_mode:
+		if multiplayer.multiplayer_peer:
+			multiplayer.multiplayer_peer.close()
+			multiplayer.multiplayer_peer = null
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	
 
 func _on_report_button_pressed():
 	"""Denuncia jogada inválida"""
@@ -244,7 +253,7 @@ func update_ui_state():
 		
 	var current_state = game_manager.current_state
 	match current_state:
-		0:  # MENU
+		0: # MENU
 			if start_button:
 				start_button.visible = true
 			pass_button.visible = false
@@ -256,7 +265,7 @@ func update_ui_state():
 			if has_node("MainContainer"):
 				$MainContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			
-		1:  # PLAYING
+		1: # PLAYING
 			if start_button:
 				start_button.visible = false
 			pass_button.visible = game_manager.is_human_turn() if game_manager.has_method("is_human_turn") else true
@@ -269,7 +278,7 @@ func update_ui_state():
 			if has_node("MainContainer"):
 				$MainContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			
-		2:  # GAME_OVER
+		2: # GAME_OVER
 			buy_button.visible = false
 			report_button.visible = false
 			pass_button.visible = false
@@ -313,7 +322,7 @@ func show_temporary_message(message: String):
 	tween.tween_property(temp_label, "modulate:a", 1.0, 0.2)
 	
 	# Aguardar e fade out
-	tween.tween_interval(1.5)  # Mensagem visível por 1.5 segundo
+	tween.tween_interval(1.5) # Mensagem visível por 1.5 segundo
 	tween.tween_property(temp_label, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(func(): temp_label.visible = false)
 

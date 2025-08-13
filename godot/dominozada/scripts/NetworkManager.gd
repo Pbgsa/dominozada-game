@@ -1,22 +1,19 @@
-# scripts/NetworkManager.gd
 extends Node
 
 const PORT := 12345
 const MAX_PLAYERS := 4
 
-# NOVO: Variável para controlar o modo de jogo
 var is_online_mode: bool = false
-
-# NOVO: Variável para armazenar o nome do jogador local
 var local_player_name: String = ""
 
-# SINAIS para a UI reagir
 signal player_list_changed(players: Dictionary)
+signal player_ready_status_changed(statuses: Dictionary)
 signal connection_succeeded
 signal connection_failed_signal
 signal server_disconnected_signal
 
-var players: Dictionary = {} # peer_id -> nome
+var players: Dictionary = {}
+var players_ready_status: Dictionary = {} 
 var is_host: bool = false
 
 func _ready():
@@ -39,7 +36,10 @@ func create_host(player_name: String = "Host"):
 	is_host = true
 	
 	players[1] = local_player_name
+	players_ready_status[1] = false
+	
 	player_list_changed.emit(players)
+	player_ready_status_changed.emit(players_ready_status)
 	connection_succeeded.emit()
 	print("Servidor criado. Meu ID: ", multiplayer.get_unique_id(), " Nome: ", local_player_name)
 
@@ -56,21 +56,18 @@ func join_server(ip: String, player_name: String = ""):
 
 func _on_peer_connected(id: int):
 	print("Jogador conectado: ", id)
-	if is_host:
-		# Temporariamente adiciona com ID, será atualizado quando receber o nome
-		players[id] = "Cliente %s" % str(id)
-		rpc("update_player_list_rpc", players)
 
 func _on_peer_disconnected(id: int):
 	print("Jogador desconectado: ", id)
 	if is_host:
 		players.erase(id)
-		rpc("update_player_list_rpc", players)
+		players_ready_status.erase(id)
+		client_update_player_list.rpc(players)
+		client_update_ready_status.rpc(players_ready_status)
 
 func _on_connected_to_server():
 	print("Conectado ao servidor com sucesso! Meu ID: ", multiplayer.get_unique_id())
-	# Enviar o nome do jogador para o servidor
-	rpc_id(1, "receive_player_name", multiplayer.get_unique_id(), local_player_name)
+	server_receive_player_info.rpc_id(1, multiplayer.get_unique_id(), local_player_name)
 	connection_succeeded.emit()
 
 func _on_connection_failed():
@@ -82,34 +79,61 @@ func _on_server_disconnected():
 	server_disconnected_signal.emit()
 	_reset_network()
 
+
 @rpc("any_peer", "call_local", "reliable")
-func update_player_list_rpc(new_players: Dictionary):
+func client_update_player_list(new_players: Dictionary):
 	players = new_players
 	player_list_changed.emit(players)
-	print("Lista de jogadores atualizada: ", players)
+
+@rpc("any_peer", "call_local", "reliable")
+func client_update_ready_status(new_statuses: Dictionary):
+	players_ready_status = new_statuses
+	player_ready_status_changed.emit(players_ready_status)
 
 @rpc("any_peer", "reliable")
-func receive_player_name(player_id: int, player_name: String):
-	# Apenas o host deve processar este RPC
-	if not is_host:
-		return
+func server_receive_player_info(player_id: int, player_name: String):
+	if not multiplayer.is_server(): return
 	
-	print("Recebido nome do jogador ", player_id, ": ", player_name)
 	players[player_id] = player_name
-	# Atualizar a lista para todos os jogadores
-	rpc("update_player_list_rpc", players)
+	players_ready_status[player_id] = false
+	
+	client_update_player_list.rpc(players)
+	client_update_ready_status.rpc(players_ready_status)
 
-# Função para obter o nome de um jogador pelo ID
+@rpc("any_peer", "call_local", "reliable")
+func server_set_player_ready_status(is_ready: bool):
+	if not multiplayer.is_server(): return
+	
+	var sender_id = multiplayer.get_remote_sender_id()
+	if sender_id == 0:
+		sender_id = 1
+	
+	if sender_id in players_ready_status:
+		players_ready_status[sender_id] = is_ready
+		print("Jogador %d mudou status para: %s" % [sender_id, is_ready])
+		client_update_ready_status.rpc(players_ready_status)
+
+
 func get_player_name(player_id: int) -> String:
 	return players.get(player_id, "Jogador %s" % str(player_id))
 
-# Função para obter o nome do jogador local
 func get_local_player_name() -> String:
 	return local_player_name
+
+func are_all_players_ready() -> bool:
+	if players.is_empty() or players.size() != players_ready_status.size():
+		return false
+	
+	for id in players:
+		if not players_ready_status.get(id, false):
+			return false
+	
+	return true
 	
 func _reset_network():
 	players.clear()
+	players_ready_status.clear()
 	is_host = false
 	multiplayer.multiplayer_peer = null
-	is_online_mode = false # Reseta o modo de jogo
-	local_player_name = "" # Reseta o nome do jogador
+	is_online_mode = false
+	local_player_name = ""
