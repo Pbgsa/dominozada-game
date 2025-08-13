@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var buy_button := $MainContainer/ActionButtons/BuyButton
 @onready var main_menu_button := $MainContainer/GameOverPanel/GameOverContent/MainMenuButton if has_node("MainContainer/GameOverPanel/GameOverContent/MainMenuButton") else null
 @onready var report_button := $MainContainer/ActionButtons/ReportButton
+@onready var music_button := $MainContainer/ActionButtons/MusicButton if has_node("MainContainer/ActionButtons/MusicButton") else null
 
 var game_manager: Node
 var domino_set: RefCounted
@@ -52,6 +53,8 @@ func _ready():
 		new_game_button.pressed.connect(_on_new_game_button_pressed)
 	if main_menu_button:
 		main_menu_button.pressed.connect(_on_main_menu_button_pressed)
+	if music_button:
+		music_button.pressed.connect(_on_music_button_pressed)
 	
 	# UI inicial - permitir inputs passarem através por padrão
 	if has_node("MainContainer"):
@@ -242,6 +245,10 @@ func _on_report_button_pressed():
 	else:
 		if game_manager:
 			game_manager.report_invalid_move()
+
+func _on_music_button_pressed():
+	"""Muda para a próxima música"""
+	MusicManager.next_track()
 
 func update_ui_state():
 	"""Atualiza estado geral da UI - apenas modo offline"""

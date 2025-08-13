@@ -59,6 +59,11 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "Comprar Peça"
 
+[node name="MusicButton" type="Button" parent="MainContainer/ActionButtons"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Mudar música"
+
 [node name="GameOverPanel" type="Panel" parent="MainContainer"]
 visible = false
 layout_mode = 1

@@ -24,6 +24,8 @@ offset_left = -175.0
 offset_top = 15.0
 offset_right = 175.0
 offset_bottom = 45.0
+grow_horizontal = 1
+grow_vertical = 1
 
 [node name="LeftHand" parent="." instance=ExtResource("3_mwnbu")]
 layout_mode = 1
