@@ -4,6 +4,7 @@ extends Node
 @onready var audio_player := AudioStreamPlayer.new()
 
 var music_tracks := [
+	preload("res://assets/sounds/halls-music.ogg"),
 	preload("res://assets/sounds/ambient-guitar-music.ogg"),
 	preload("res://assets/sounds/sweet_home_alabama.ogg"),
 	preload("res://assets/sounds/baroes_da_pisadinha.ogg"),
