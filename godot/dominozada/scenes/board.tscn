@@ -63,10 +63,11 @@ position = Vector2(300, 0)
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -140.0
+offset_left = -100.0
 offset_top = 10.0
 offset_right = -10.0
-offset_bottom = 40.0
+offset_bottom = 30.0
+theme_override_font_sizes/font_size = 10
 text = "Change BG"
 table_sprite = NodePath("../../TableBackground")
 
